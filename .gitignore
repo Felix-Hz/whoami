@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+.terraform
+proposed-infra
+
 # Editor directories and files
 !.vscode/extensions.json
 .idea
