@@ -1,10 +1,37 @@
+resource "aws_resourcegroups_group" "personal_website" {
+  name = "PERSONAL_WEBSITE"
+
+  resource_query {
+    query = jsonencode({
+      ResourceTypeFilters = ["AWS::AllSupported"]
+      TagFilters = [
+        {
+          Key    = "Application"
+          Values = ["PERSONAL_WEBSITE"]
+        }
+      ]
+    })
+  }
+
+  tags = {
+    Application = "PERSONAL_WEBSITE"
+    Environment = "production"
+  }
+}
+
 /*    ________ */
 /*   / __/_  / */
 /*  _\ \_/_ <  */
 /* /___/____/  */
 
 resource "aws_s3_bucket" "whoami_build" {
-  bucket = "felix-hzv.dev"
+  bucket        = "felix-hzv.dev"
+  force_destroy = true
+
+  tags = {
+    Application = "PERSONAL_WEBSITE"
+    Environment = "production"
+  }
 }
 
 resource "aws_s3_bucket_versioning" "versioning" {
@@ -22,5 +49,112 @@ resource "aws_s3_bucket_public_access_block" "block" {
   block_public_policy     = true
   ignore_public_acls      = true
   restrict_public_buckets = true
+}
+
+/*   _______             ______              __  */
+/*  / ___/ /__  __ _____/ / __/______  ___  / /_ */
+/* / /__/ / _ \/ // / _  / _// __/ _ \/ _ \/ __/ */
+/* \___/_/\___/\_,_/\_,_/_/ /_/  \___/_//_/\__/  */
+
+# Route 53 zone
+resource "aws_route53_zone" "main" {
+  name = "felix-hzv.dev"
+
+  tags = {
+    Application = "PERSONAL_WEBSITE"
+    Environment = "production"
+  }
+}
+
+# DNS records 
+resource "aws_route53_record" "www" {
+  zone_id = aws_route53_zone.main.zone_id
+  name    = "felix-hzv.dev"
+  type    = "A"
+
+
+  alias {
+    name                   = aws_cloudfront_distribution.cdn.domain_name
+    zone_id                = aws_cloudfront_distribution.cdn.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
+resource "aws_cloudfront_origin_access_identity" "origin_access_identity" {
+  comment = "OAI for CloudFront to access S3"
+}
+
+resource "aws_s3_bucket_policy" "policy" {
+  bucket = aws_s3_bucket.whoami_build.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          AWS = aws_cloudfront_origin_access_identity.origin_access_identity.iam_arn
+        }
+        Action   = "s3:GetObject"
+        Resource = "${aws_s3_bucket.whoami_build.arn}/*"
+      }
+    ]
+  })
+}
+
+resource "aws_cloudfront_distribution" "cdn" {
+
+  aliases = ["felix-hzv.dev"]
+
+  tags = {
+    Application = "PERSONAL_WEBSITE"
+    Environment = "production"
+  }
+
+  origin {
+    domain_name = aws_s3_bucket.whoami_build.bucket_regional_domain_name
+    origin_id   = "s3-whoami_build-origin"
+
+    s3_origin_config {
+      origin_access_identity = aws_cloudfront_origin_access_identity.origin_access_identity.cloudfront_access_identity_path
+    }
+  }
+
+  enabled             = true
+  is_ipv6_enabled     = true
+  default_root_object = "index.html"
+  price_class         = "PriceClass_200" // Mid tier: Asia, Australia Europe, US, Canada
+
+  default_cache_behavior {
+    compress = true
+
+    allowed_methods  = ["GET", "HEAD"]
+    cached_methods   = ["GET", "HEAD"]
+    target_origin_id = "s3-whoami_build-origin"
+
+    min_ttl     = 0        # Minimum time to cache
+    default_ttl = 86400    # 24 hours (default cache duration)
+    max_ttl     = 31536000 # 1 year (max cache duration)
+
+    forwarded_values {
+      query_string = false
+      cookies {
+        forward = "none"
+      }
+    }
+
+    viewer_protocol_policy = "redirect-to-https"
+  }
+
+  restrictions {
+    geo_restriction {
+      restriction_type = "none"
+    }
+  }
+
+  viewer_certificate {
+    acm_certificate_arn      = var.acm_certificate_arn
+    ssl_support_method       = "sni-only"
+    minimum_protocol_version = "TLSv1.2_2021"
+  }
 }
 
