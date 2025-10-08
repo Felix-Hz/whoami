@@ -14,6 +14,11 @@ dist-ssr
 
 .terraform
 proposed-infra
+terraform.tfvars
+*.tfvars
+*.tfvars.json
+terraform.tfstate
+terraform.tfstate.backup
 
 # Editor directories and files
 !.vscode/extensions.json
