@@ -3,15 +3,6 @@ name: Linting
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-  push:
-    branches:
-      - "**"
-    paths-ignore:
-      - ".github/**"
-      - ".vscode/**"
-      - "infra/**"
-      - "**.md"
-      - "pnpm-lock.yaml"
 
 jobs:
   lint:
@@ -22,17 +13,16 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: latest
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: "22"
           cache: "pnpm"
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: latest
-          run_install: false
 
       - name: Install dependencies
         run: pnpm install
