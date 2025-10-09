@@ -9,7 +9,7 @@ on:
 
 jobs:
   lint:
-    if: github.event_name == 'pull_request' || github.ref_name != 'main'
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
     name: Linting
     runs-on: ubuntu-latest
 
