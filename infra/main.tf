@@ -66,9 +66,13 @@ resource "aws_route53_record" "apex" {
 resource "aws_route53_record" "www" {
   zone_id = aws_route53_zone.main.zone_id
   name    = "www.felix-hzv.dev"
-  type    = "CNAME"
-  ttl     = 300
-  records = ["felix-hzv.dev"]
+  type    = "A"
+
+  alias {
+    name                   = aws_cloudfront_distribution.cdn.domain_name
+    zone_id                = aws_cloudfront_distribution.cdn.hosted_zone_id
+    evaluate_target_health = false
+  }
 }
 
 resource "aws_cloudfront_origin_access_identity" "origin_access_identity" {
@@ -94,7 +98,7 @@ resource "aws_s3_bucket_policy" "policy" {
 
 resource "aws_cloudfront_distribution" "cdn" {
 
-  aliases = ["felix-hzv.dev"]
+  aliases = ["felix-hzv.dev", "www.felix-hzv.dev"]
 
   tags = {
     Application = "PERSONAL_WEBSITE"
