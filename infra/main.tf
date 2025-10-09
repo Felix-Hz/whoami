@@ -1,21 +1,5 @@
-resource "aws_resourcegroups_group" "personal_website" {
-  name = "PERSONAL_WEBSITE"
-
-  resource_query {
-    query = jsonencode({
-      ResourceTypeFilters = ["AWS::AllSupported"]
-      TagFilters = [
-        {
-          Key    = "Application"
-          Values = ["PERSONAL_WEBSITE"]
-        }
-      ]
-    })
-  }
-
-  tags = {
-    Application = "PERSONAL_WEBSITE"
-    Environment = "production"
+terraform {
+  backend "s3" {
   }
 }
 
