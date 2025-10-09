@@ -39,7 +39,7 @@ jobs:
           echo "success=true" >> $GITHUB_OUTPUT
 
       - name: Upload dist artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dist
           path: dist/
