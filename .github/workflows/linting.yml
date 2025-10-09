@@ -33,7 +33,7 @@ jobs:
       - name: Biome Check
         uses: biomejs/setup-biome@v1
         with:
-          version: 2.2.5
+          version: 2.2.4
 
       - name: Run Biome
         run: biome ci . --staged
