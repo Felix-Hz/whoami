@@ -7,10 +7,7 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "include": ["**", "!dist", "!node_modules", "!.github"]
-  },
-  "organizeImports": {
-    "enabled": true
+    "includes": ["**", "!dist", "!node_modules", "!.github"]
   },
   "formatter": {
     "enabled": true,
@@ -33,6 +30,14 @@
   "javascript": {
     "formatter": {
       "quoteStyle": "double"
+    }
+  },
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
     }
   }
 }

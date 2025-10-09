@@ -31,9 +31,9 @@ jobs:
         run: pnpm tsc --noEmit
 
       - name: Biome Check
-        uses: biomejs/setup-biome@v1
+        uses: biomejs/setup-biome@v2
         with:
-          version: latest
+          version: 2.2.5
 
       - name: Run Biome
         run: biome ci .
