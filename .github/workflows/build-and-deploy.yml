@@ -89,9 +89,5 @@ jobs:
           path: dist
 
       - name: Deploy to S3
-        uses: aws-actions/aws-s3-cp-action@v1
-        with:
-          source: dist
-          dest: s3://felix-hzv.dev
-          recursive: true
-          delete: true
+        run: |
+          aws s3 sync dist/ s3://felix-hzv.dev --delete
