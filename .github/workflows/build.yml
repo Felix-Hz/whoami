@@ -7,7 +7,6 @@ on:
 
 jobs:
   build:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     outputs:
       build_success: ${{ steps.build.outputs.success }}
