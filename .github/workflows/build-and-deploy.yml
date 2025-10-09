@@ -58,7 +58,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: ./infra
-        run: terraform init
+        run: terraform init -backend-config=backend.conf
 
       - name: Terraform Plan
         working-directory: ./infra
