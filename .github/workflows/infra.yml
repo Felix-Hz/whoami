@@ -1,34 +1,18 @@
-name: Deploy
+name: Terraform
 
 on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
+  workflow_run:
+    workflows: [Build]
+    types:
+      - completed
 
 jobs:
-  deploy:
+  infrastructure:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - uses: actions/checkout@v3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '22'
-          cache: 'pnpm'
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: latest
-          run_install: false
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Build website
-        run: pnpm build
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
@@ -55,12 +39,3 @@ jobs:
       - name: Terraform Apply
         working-directory: ./infra
         run: terraform apply -auto-approve tfplan
-
-      - name: Deploy to S3
-        run: |
-          aws s3 sync dist/ s3://felix-hzv.dev --delete
-
-      # TODO When stable uncomment
-      # - name: Invalidate CloudFront
-      #   run: |
-      #     aws cloudfront create-invalidation --distribution-id $(terraform -chdir=./infra output -raw cloudfront_distribution_id) --paths "/*"
