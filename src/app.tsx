@@ -43,7 +43,7 @@ function Content() {
 
 function Footer() {
   return (
-    <footer className=" w-full p-4 md:p-10 bg-black">
+    <footer className="w-full p-4 md:p-10 bg-black">
       <nav className="w-full flex justify-center md:justify-between items-center [&>*]:text-white">
         <Logo className="hidden md:inline" />
         <p className="text-md md:text-md">developed by yours truly, with much 🧉 © {new Date().getFullYear()}</p>
