@@ -31,7 +31,7 @@ function Content() {
         software engineer | web-application developer | tech enthusiast
       </h2>
       <p className="text-xl text-gray-700 max-w-5xl leading-relaxed py-4 text-justify">
-        passionate about building software that solves user's problems. love the bleeding-edge, firm believer in
+        passionate about building software that solves users' problems. love the bleeding-edge, firm believer in
         perpetual learning. design software for humans. architect solutions for resilience. security must be part of the
         mvp. simple is better than complex. complex is better than complicated. actions transmit values better than
         words.
