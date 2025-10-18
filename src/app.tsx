@@ -85,7 +85,7 @@ function Socials({ className }: { className?: string }) {
 
 function MyFace() {
   return (
-    <pre className="text-black font-mono overflow-y-hidden leading-none text-[4px] hover:animate-[spin_1.5s_linear] [animation-duration:1s] hover:transform hover:scale-125 transition-all duration-300 ease-in-out hover:cursor-grabbing">
+    <pre className="text-black font-mono overflow-y-hidden leading-none text-[4px] hover:animate-[spin_0.85s_linear_3] hover:transform hover:scale-125 transition-all duration-300 ease-in-out hover:cursor-grabbing">
       {faceAscii}
     </pre>
   );
@@ -96,7 +96,10 @@ function GetInTouch({ className }: { className?: string }) {
     <h2
       className={` group  py-2 px-4 bg-black rounded-md max-w-md text-center shadow-md hover:transform hover:scale-105 transition-all duration-300 ease-in-out hover:cursor-help ${className}`}
     >
-      <a className="[&>*]:inline group-hover:cursor-help font-extrabold font-stretch-extra-expanded text-xl" href="mailto:me@felix-hzv.dev">
+      <a
+        className="[&>*]:inline group-hover:cursor-help font-extrabold font-stretch-extra-expanded text-xl"
+        href="mailto:me@felix-hzv.dev"
+      >
         let's talk &rarr; me@felix-hzv.dev <IoIosMail />
       </a>
     </h2>
