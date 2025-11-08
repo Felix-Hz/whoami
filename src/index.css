@@ -1,44 +1,49 @@
 @import "tailwindcss";
 
 @font-face {
-  font-family: "supply-sans-ultralight";
-  src: url("./assets/fonts/PPSupplySans-Ultralight.otf") format("opentype");
+    font-family: "supply-sans-ultralight";
+    src: url("./assets/fonts/PPSupplySans-Ultralight.otf") format("opentype");
 }
 
 @font-face {
-  font-family: "mondwest-regular";
-  src: url("./assets/fonts/PPMondwest-Regular.otf") format("opentype");
+    font-family: "mondwest-regular";
+    src: url("./assets/fonts/PPMondwest-Regular.otf") format("opentype");
 }
 
 @font-face {
-  font-family: "neue-bit-bold";
-  src: url("./assets/fonts/PPNeueBit-Bold.otf") format("opentype");
+    font-family: "neue-bit-bold";
+    src: url("./assets/fonts/PPNeueBit-Bold.otf") format("opentype");
 }
 
 :root {
-  font-family: "supply-sans-ultralight", system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+    font-family:
+        "supply-sans-ultralight", system-ui, Avenir, Helvetica, Arial,
+        sans-serif;
 
-  color-scheme: light dark;
+    line-height: 1.5;
+    font-weight: 400;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+    color-scheme: light dark;
+
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
+    margin: 0;
+    min-width: 320px;
+    min-height: 100vh;
 }
 
 h1 {
-  font-family: "neue-bit-bold", system-ui, Avenir, Helvetica, Arial, sans-serif;
+    font-family:
+        "neue-bit-bold", system-ui, Avenir, Helvetica, Arial, sans-serif;
 }
 
 h2 {
-  font-family: "mondwest-regular", system-ui, Avenir, Helvetica, Arial, sans-serif;
-  font-weight: 400;
+    font-family:
+        "mondwest-regular", system-ui, Avenir, Helvetica, Arial, sans-serif;
+    font-weight: 400;
 }
