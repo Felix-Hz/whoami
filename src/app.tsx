@@ -27,18 +27,15 @@ function Content() {
     <section className="flex flex-col justify-center items-center gap-4 md:gap-8 px-4 pt-2 pb-2 md:pb-8 lg:pb-10">
       <div className="flex flex-col items-center justify-center gap-2 text-justify-center max-w-[90%] md:max-w-[55%] mx-auto">
         <MyFace />
-        <h1 className="text-5xl md:text-6xl text-black antialiased tracking-tighter">
-          felix hernandez vieyra
-        </h1>
+        <h1 className="text-5xl md:text-6xl text-black antialiased tracking-tighter">felix hernandez vieyra</h1>
         <h2 className="md:text-lg lg:text-2xl text-gray-800 tracking-tight hidden md:block">
           software engineer | web-application developer | tech enthusiast
         </h2>
         <p className="text-lg  text-gray-700 max-w-5xl leading-relaxed py-4 text-justify">
-          passionate about building software that solves users' problems. love
-          the bleeding-edge, firm believer in perpetual learning. design
-          software for humans. architect solutions for resilience. security must
-          be part of the mvp. simple is better than complex. complex is better
-          than complicated. actions transmit values better than words.
+          passionate about building software that solves users' problems. love the bleeding-edge, firm believer in
+          perpetual learning. design software for humans. architect solutions for resilience. security must be part of
+          the mvp. simple is better than complex. complex is better than complicated. actions transmit values better
+          than words.
         </p>
       </div>
 
@@ -52,9 +49,7 @@ function Footer() {
     <footer className="w-full p-4 mt-4 md:mt-1 md:p-10 bg-black">
       <nav className="w-full flex justify-center md:justify-between items-center [&>*]:text-white">
         <Logo className="hidden md:inline" />
-        <p className="text-md md:text-md">
-          developed by yours truly, with much 🧉 © {new Date().getFullYear()}
-        </p>
+        <p className="text-md md:text-md">developed by yours truly, with much 🧉 © {new Date().getFullYear()}</p>
         <Socials className="hidden md:flex" />
       </nav>
     </footer>
@@ -73,20 +68,12 @@ function Socials({ className }: { className?: string }) {
   return (
     <ul className={`flex gap-1 [&>*]:cursor-pointer ${className}`}>
       <li>
-        <a
-          href="https://www.linkedin.com/in/felix-hernandez-vieyra/"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <a href="https://www.linkedin.com/in/felix-hernandez-vieyra/" target="_blank" rel="noopener noreferrer">
           <PiLinkedinLogoFill size={33} />
         </a>
       </li>
       <li>
-        <a
-          href="https://github.com/Felix-Hz"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <a href="https://github.com/Felix-Hz" target="_blank" rel="noopener noreferrer">
           <FaGithubSquare size={32} />
         </a>
       </li>
