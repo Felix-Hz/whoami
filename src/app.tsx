@@ -24,16 +24,14 @@ function Header() {
 
 function Content() {
   return (
-    <section className="flex flex-col justify-center items-center gap-4 md:gap-8 px-8 md:px-4 pt-2 pb-2 md:pb-8 lg:pb-10">
+    <section className="flex flex-col justify-center items-center gap-4 md:gap-8 px-4 pt-2 pb-2 md:pb-8 lg:pb-10">
       <div className="flex flex-col items-center justify-center gap-2 text-justify-center max-w-[90%] md:max-w-[55%] mx-auto">
         <MyFace />
-        <h1 className="text-6xl md:text-5xl lg:text-6xl text-black antialiased tracking-tighter">
-          felix hernandez vieyra
-        </h1>
-        <h2 className="text-3xl lg:text-2xl text-gray-800 tracking-tight hidden md:block">
+        <h1 className="text-5xl md:text-6xl text-black antialiased tracking-tighter">felix hernandez vieyra</h1>
+        <h2 className="md:text-lg lg:text-2xl text-gray-800 tracking-tight hidden md:block">
           software engineer | web-application developer | tech enthusiast
         </h2>
-        <p className="text-xl lg:text-lg text-gray-700 max-w-5xl leading-relaxed py-4 text-justify">
+        <p className="text-lg  text-gray-700 max-w-5xl leading-relaxed py-4 text-justify">
           passionate about building software that solves users' problems. love the bleeding-edge, firm believer in
           perpetual learning. design software for humans. architect solutions for resilience. security must be part of
           the mvp. simple is better than complex. complex is better than complicated. actions transmit values better
@@ -87,7 +85,7 @@ function MyFace() {
   return (
     <pre
       aria-hidden="true"
-      className="text-black font-mono overflow-y-hidden leading-none text-[4px] hover:animate-[spin_0.85s_linear_3] hover:scale-125 transition-all duration-300 ease-in-out hover:cursor-grabbing"
+      className="text-black font-mono overflow-y-hidden leading-none text-[4px] hover:animate-[spin_0.85s_linear_1] hover:scale-125 transition-all duration-300 ease-in-out hover:cursor-grabbing"
     >
       {faceAscii}
     </pre>
@@ -97,7 +95,7 @@ function MyFace() {
 function GetInTouch({ className }: { className?: string }) {
   return (
     <h2
-      className={` group py-2 px-4 bg-black rounded-md max-w-md text-center shadow-md hover:scale-105 transition-all duration-300 ease-in-out hover:cursor-help ${className}`}
+      className={` group py-2 px-4 bg-black text-white rounded-md max-w-md text-center shadow-md hover:scale-105 transition-all duration-300 ease-in-out hover:cursor-help ${className}`}
     >
       <a
         className="[&>*]:inline group-hover:cursor-help font-extrabold font-stretch-extra-expanded text-xl"
