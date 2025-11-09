@@ -2,6 +2,15 @@ import { FaGithubSquare } from "react-icons/fa";
 import { IoIosMail } from "react-icons/io";
 import { PiLinkedinLogoFill } from "react-icons/pi";
 import { faceAscii } from "./assets/ascii-face";
+import { trackSocialClick } from "./utils/track-social-interaction";
+
+declare global {
+  interface Window {
+    // Keeps TypeScript happy :)
+    // Push to data layer, defined in the idx:
+    gtag?: (...args: unknown[]) => void;
+  }
+}
 
 export function App() {
   return (
@@ -68,12 +77,22 @@ function Socials({ className }: { className?: string }) {
   return (
     <ul className={`flex gap-1 [&>*]:cursor-pointer ${className}`}>
       <li>
-        <a href="https://www.linkedin.com/in/felix-hernandez-vieyra/" target="_blank" rel="noopener noreferrer">
+        <a
+          href="https://www.linkedin.com/in/felix-hernandez-vieyra/"
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => trackSocialClick("linkedin")}
+        >
           <PiLinkedinLogoFill size={33} />
         </a>
       </li>
       <li>
-        <a href="https://github.com/Felix-Hz" target="_blank" rel="noopener noreferrer">
+        <a
+          href="https://github.com/Felix-Hz"
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => trackSocialClick("github")}
+        >
           <FaGithubSquare size={32} />
         </a>
       </li>
@@ -100,6 +119,7 @@ function GetInTouch({ className }: { className?: string }) {
       <a
         className="[&>*]:inline group-hover:cursor-help font-extrabold font-stretch-extra-expanded text-xl"
         href="mailto:me@felix-hzv.dev"
+        onClick={() => trackSocialClick("email")}
       >
         let's talk &rarr; me@felix-hzv.dev <IoIosMail />
       </a>
