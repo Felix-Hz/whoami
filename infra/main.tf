@@ -75,6 +75,32 @@ resource "aws_route53_record" "www" {
   }
 }
 
+/*   __  ___     _ __  */
+/*  /  |/  /__ _(_) /  */
+/* / /|_/ / _ `/ / /   */
+/* /_/  /_/\_,_/_/_/    */
+
+resource "aws_route53_record" "mx" {
+  zone_id = aws_route53_zone.main.zone_id
+  name    = "felix-hzv.dev"
+  type    = "MX"
+  ttl     = 300
+  records = [
+    "10 mx1.privateemail.com",
+    "10 mx2.privateemail.com"
+  ]
+}
+
+resource "aws_route53_record" "spf" {
+  zone_id = aws_route53_zone.main.zone_id
+  name    = "felix-hzv.dev"
+  type    = "TXT"
+  ttl     = 300
+  records = [
+    "v=spf1 include:spf.privateemail.com ~all"
+  ]
+}
+
 resource "aws_cloudfront_origin_access_identity" "origin_access_identity" {
   comment = "OAI for CloudFront to access S3"
 }
