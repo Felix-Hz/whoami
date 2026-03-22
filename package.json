@@ -14,7 +14,6 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.1.13",
     "preact": "^10.27.2",
-    "react-icons": "^5.5.0",
     "tailwindcss": "^4.1.13"
   },
   "devDependencies": {

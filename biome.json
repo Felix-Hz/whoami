@@ -24,6 +24,10 @@
         "noExcessiveCognitiveComplexity": { "level": "warn", "options": { "maxAllowedComplexity": 15 } }
       },
       "performance": { "recommended": true },
+      "suspicious": {
+        "recommended": true,
+        "noUnknownAtRules": "off"
+      },
       "recommended": true
     }
   },
