@@ -28,7 +28,6 @@ export function AsciiPortrait() {
           >
             {lines.map((line, i) => (
               <span
-                // biome-ignore lint/suspicious/noArrayIndexKey: static content, never reordered
                 key={i}
                 className="block text-text-primary transition-colors duration-normal group-hover:text-accent"
                 style={{ transitionDelay: reducedMotion ? "0ms" : `${i * 30}ms` }}
