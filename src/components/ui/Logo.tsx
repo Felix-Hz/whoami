@@ -5,7 +5,6 @@ export function Logo({ className }: { className?: string }) {
       <span className="ml-1.5 tracking-tight">
         {"whoami".split("").map((char, i) => (
           <span
-            // biome-ignore lint/suspicious/noArrayIndexKey: static string, never reordered
             key={i}
             className="text-text-primary transition-colors duration-normal group-hover:text-accent"
             style={{ transitionDelay: `${i * 40}ms` }}

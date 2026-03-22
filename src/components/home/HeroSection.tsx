@@ -16,11 +16,9 @@ export function HeroSection() {
           >
             {NAME.split("").map((char, i) =>
               char === " " ? (
-                // biome-ignore lint/suspicious/noArrayIndexKey: static string, never reordered
                 <span key={i}>&nbsp;</span>
               ) : (
                 <span
-                  // biome-ignore lint/suspicious/noArrayIndexKey: static string, never reordered
                   key={i}
                   className="transition-colors duration-normal group-hover:text-accent"
                   style={{ transitionDelay: `${i * 25}ms` }}
