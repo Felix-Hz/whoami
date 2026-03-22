@@ -14,9 +14,6 @@ importers:
       preact:
         specifier: ^10.27.2
         version: 10.27.2
-      react-icons:
-        specifier: ^5.5.0
-        version: 5.5.0(react@19.2.0)
       tailwindcss:
         specifier: ^4.1.13
         version: 4.1.13
@@ -835,15 +832,6 @@ packages:
   preact@10.27.2:
     resolution: {integrity: sha512-5SYSgFKSyhCbk6SrXyMpqjb5+MQBgfvEKE/OC+PujcY34sOpqtr+0AZQtPYx5IA6VxynQ7rUPCtKzyovpj9Bpg==}
 
-  react-icons@5.5.0:
-    resolution: {integrity: sha512-MEFcXdkP3dLo8uumGI5xN3lDFNsRtrjbOEKDLD7yv76v4wpnEq2Lt2qeHaQOr34I/wPN3s3+N08WkQ+CW37Xiw==}
-    peerDependencies:
-      react: '*'
-
-  react@19.2.0:
-    resolution: {integrity: sha512-tmbWg6W31tQLeB5cdIBOicJDJRR2KzXsV7uSK9iNfLWQ5bIZfxuPEHp7M8wiHyHnn0DD1i7w3Zmin0FtkrwoCQ==}
-    engines: {node: '>=0.10.0'}
-
   rollup@4.52.2:
     resolution: {integrity: sha512-I25/2QgoROE1vYV+NQ1En9T9UFB9Cmfm2CJ83zZOlaDpvz29wGQSZXWKw7MiNXau7wYgB/T9fVIdIuEQ+KbiiA==}
     engines: {node: '>=18.0.0', npm: '>=8.0.0'}
@@ -1608,12 +1596,6 @@ snapshots:
       source-map-js: 1.2.1
 
   preact@10.27.2: {}
-
-  react-icons@5.5.0(react@19.2.0):
-    dependencies:
-      react: 19.2.0
-
-  react@19.2.0: {}
 
   rollup@4.52.2:
     dependencies:

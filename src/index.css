@@ -1,27 +1,86 @@
 @import "tailwindcss";
 
+/* ------------------------------------------------------------------ */
+/* Design Tokens                                                       */
+/* ------------------------------------------------------------------ */
+
+@theme {
+  --color-surface-primary: #fafafa;
+  --color-surface-elevated: #ffffff;
+  --color-surface-inverse: #0a0a0a;
+
+  --color-text-primary: #0a0a0a;
+  --color-text-secondary: #404040;
+  --color-text-tertiary: #737373;
+  --color-text-inverse: #fafafa;
+
+  --color-accent: #4a7c59;
+  --color-accent-hover: #3d6b4a;
+  --color-accent-subtle: #4a7c5915;
+
+  --color-border: #e5e5e5;
+  --color-border-strong: #0a0a0a;
+
+  --font-display: "neue-bit-bold", system-ui, sans-serif;
+  --font-heading: "mondwest-regular", system-ui, sans-serif;
+  --font-body: "supply-sans-ultralight", system-ui, sans-serif;
+  --font-mono: "SF Mono", "Fira Code", ui-monospace, monospace;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+
+  --grain-opacity: 0.03;
+}
+
+/* Dark mode (prepared, not wired up yet) */
+:root[data-theme="dark"] {
+  --color-surface-primary: #0a0a0a;
+  --color-surface-elevated: #171717;
+  --color-surface-inverse: #fafafa;
+  --color-text-primary: #fafafa;
+  --color-text-secondary: #a3a3a3;
+  --color-text-tertiary: #737373;
+  --color-text-inverse: #0a0a0a;
+  --color-accent: #6aad7b;
+  --color-accent-hover: #7ec48e;
+  --color-accent-subtle: #6aad7b15;
+  --color-border: #262626;
+  --color-border-strong: #fafafa;
+}
+
+/* ------------------------------------------------------------------ */
+/* Font Faces                                                          */
+/* ------------------------------------------------------------------ */
+
 @font-face {
   font-family: "supply-sans-ultralight";
   src: url("./assets/fonts/PPSupplySans-Ultralight.otf") format("opentype");
+  font-display: swap;
 }
 
 @font-face {
   font-family: "mondwest-regular";
   src: url("./assets/fonts/PPMondwest-Regular.otf") format("opentype");
+  font-display: swap;
 }
 
 @font-face {
   font-family: "neue-bit-bold";
   src: url("./assets/fonts/PPNeueBit-Bold.otf") format("opentype");
+  font-display: swap;
 }
 
+/* ------------------------------------------------------------------ */
+/* Base Styles                                                         */
+/* ------------------------------------------------------------------ */
+
 :root {
-  font-family: "supply-sans-ultralight", system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: var(--font-body);
   line-height: 1.5;
   font-weight: 400;
-
   color-scheme: light dark;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -32,13 +91,71 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  overscroll-behavior: none;
 }
 
 h1 {
-  font-family: "neue-bit-bold", system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: var(--font-display);
 }
 
 h2 {
-  font-family: "mondwest-regular", system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: var(--font-heading);
   font-weight: 400;
+}
+
+/* ------------------------------------------------------------------ */
+/* Animations                                                          */
+/* ------------------------------------------------------------------ */
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  51%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.6s var(--ease-out-expo) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .animate-breathe {
+    animation: none;
+  }
+
+  h1 > span {
+    transition-delay: 0ms;
+    transition-duration: 0ms;
+  }
 }
