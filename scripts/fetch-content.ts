@@ -8,8 +8,8 @@ const dataset = process.env.SANITY_DATASET || "production";
 const token = process.env.SANITY_API_TOKEN;
 
 if (!projectId) {
-  console.error("Missing SANITY_PROJECT_ID env var");
-  process.exit(1);
+  console.warn("Missing SANITY_PROJECT_ID env var — skipping content fetch.");
+  process.exit(0);
 }
 
 const client = createClient({

@@ -33,3 +33,4 @@ terraform.tfstate.backup
 *.sln
 *.sw?
 .env
+src/generated/*.json

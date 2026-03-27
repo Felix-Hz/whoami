@@ -1,4 +1,5 @@
 import { useEffect } from "preact/hooks";
+import { collectHead } from "@/head";
 
 interface HeadOptions {
   title: string;
@@ -18,6 +19,8 @@ function setMeta(attr: string, value: string, key: "name" | "property" = "name")
 }
 
 export function useHead({ title, description, url, image }: HeadOptions) {
+  collectHead({ title, description, url, image });
+
   useEffect(() => {
     document.title = title;
     setMeta("description", description);

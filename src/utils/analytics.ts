@@ -1,5 +1,5 @@
 function gtag(...args: unknown[]) {
-  if (window.gtag) {
+  if (typeof window !== "undefined" && window.gtag) {
     window.gtag(...args);
   }
 }
