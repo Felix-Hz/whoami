@@ -7,7 +7,7 @@
     "dev": "vite",
     "dev:fetch": "tsx --env-file=.env scripts/fetch-content.ts",
     "prebuild": "tsx scripts/fetch-content.ts",
-    "build": "pnpm prebuild && tsc -b && vite build",
+    "build": "pnpm prebuild && tsc -b && vite build && tsx --tsconfig tsconfig.app.json --import ./scripts/register-preact-compat.ts scripts/prerender.ts",
     "lint": "biome check .",
     "lint:fix": "biome check --fix .",
     "typecheck": "tsc --noEmit",
@@ -26,6 +26,7 @@
     "@preact/preset-vite": "^2.10.5",
     "@sanity/types": "^5.18.0",
     "@types/node": "^25.5.0",
+    "preact-render-to-string": "^6.6.6",
     "tsx": "^4.21.0",
     "typescript": "~5.9.3",
     "vite": "^8.0.1"
