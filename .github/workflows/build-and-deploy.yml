@@ -30,6 +30,9 @@ jobs:
         id: build
         env:
           VITE_GA_TRACKING_ID: ${{ secrets.GA_TRACKING_ID }}
+          SANITY_PROJECT_ID: ${{ secrets.SANITY_PROJECT_ID }}
+          SANITY_DATASET: ${{ secrets.SANITY_DATASET }}
+          SANITY_API_TOKEN: ${{ secrets.SANITY_API_TOKEN }}
         run: |
           pnpm build
           echo "success=true" >> $GITHUB_OUTPUT
@@ -94,3 +97,9 @@ jobs:
       - name: Deploy to S3
         run: |
           aws s3 sync dist/ s3://felix-hzv.dev --delete
+
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --paths "/*"

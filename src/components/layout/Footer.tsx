@@ -22,6 +22,12 @@ export function Footer() {
             </h3>
             <nav className="flex flex-col gap-2">
               <a
+                href="/blog"
+                className="text-text-inverse/70 hover:text-accent text-sm transition-colors duration-normal"
+              >
+                blog
+              </a>
+              <a
                 href="https://www.linkedin.com/in/felix-hernandez-vieyra/"
                 target="_blank"
                 rel="noopener noreferrer"
