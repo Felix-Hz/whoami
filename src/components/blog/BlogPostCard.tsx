@@ -1,7 +1,6 @@
 import type { BlogPost } from "@/types/blog";
 
-function formatDate(iso: string | null): string {
-  if (!iso) return "Unpublished";
+function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 }
 
@@ -14,7 +13,7 @@ export function BlogPostCard({ post, index }: { post: BlogPost; index: number })
     >
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-3 text-xs text-text-tertiary tracking-wide">
-          <time dateTime={post.publishedAt ?? undefined}>{formatDate(post.publishedAt)}</time>
+          <time dateTime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
           <span aria-hidden="true">/</span>
           <span>{post.readingTime} min read</span>
         </div>

@@ -10,8 +10,7 @@ interface BlogPostPageProps extends RoutableProps {
   slug?: string;
 }
 
-function formatDate(iso: string | null): string {
-  if (!iso) return "Unpublished";
+function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 }
 
@@ -65,7 +64,7 @@ export function BlogPostPage({ slug }: BlogPostPageProps) {
 
         <header className="mb-10 animate-fade-up" style={{ animationDelay: "100ms" }}>
           <div className="flex items-center gap-3 text-xs text-text-tertiary tracking-wide mb-3">
-            <time dateTime={post.publishedAt ?? undefined}>{formatDate(post.publishedAt)}</time>
+            <time dateTime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
             <span aria-hidden="true">/</span>
             <span>{post.readingTime} min read</span>
           </div>

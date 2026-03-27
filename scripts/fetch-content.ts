@@ -30,7 +30,7 @@ interface SanityPost {
   coverImage: string | null;
 }
 
-const QUERY = `*[_type == "post"] | order(publishedAt desc) {
+const QUERY = `*[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && defined(publishedAt) && defined(excerpt)] | order(publishedAt desc) {
   title,
   "slug": slug.current,
   excerpt,

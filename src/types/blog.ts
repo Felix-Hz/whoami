@@ -3,10 +3,10 @@ import type { PortableTextBlock } from "@portabletext/react";
 export interface BlogPost {
   title: string;
   slug: string;
-  excerpt: string | null;
+  excerpt: string;
   body: PortableTextBlock[];
   tags: string[];
-  publishedAt: string | null;
+  publishedAt: string;
   coverImage: string | null;
   readingTime: number;
 }
