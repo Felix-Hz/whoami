@@ -1,4 +1,4 @@
-import { trackSocialClick } from "@/utils/track-social-interaction";
+import { trackSocialClick } from "@/utils/analytics";
 
 function LinkedInIcon({ size = 24 }: { size?: number }) {
   return (

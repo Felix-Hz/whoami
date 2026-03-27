@@ -87,11 +87,54 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+::selection {
+  background-color: var(--color-accent);
+  color: var(--color-text-inverse);
+}
+
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
   overscroll-behavior: none;
+  overflow-x: hidden;
+  cursor: default;
+}
+
+a,
+button,
+[role="button"],
+summary {
+  cursor: pointer;
+}
+
+/* ------------------------------------------------------------------ */
+/* Scrollbar                                                           */
+/* ------------------------------------------------------------------ */
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-tertiary);
+}
+
+/* Firefox */
+@supports (scrollbar-color: auto) {
+  html {
+    scrollbar-color: var(--color-border) transparent;
+    scrollbar-width: thin;
+  }
 }
 
 h1 {
@@ -143,8 +186,24 @@ h2 {
   animation: fade-up 0.6s var(--ease-out-expo) both;
 }
 
+@keyframes route-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.route-enter {
+  animation: route-enter 0.35s var(--ease-out-expo) both;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .animate-fade-up {
+  .animate-fade-up,
+  .route-enter {
     animation: none;
     opacity: 1;
     transform: none;
@@ -156,6 +215,13 @@ h2 {
 
   h1 > span {
     transition-delay: 0ms;
+    transition-duration: 0ms;
+  }
+
+  a,
+  button,
+  [class*="hover:"],
+  [class*="transition"] {
     transition-duration: 0ms;
   }
 }
