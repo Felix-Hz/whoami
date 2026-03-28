@@ -40,7 +40,7 @@ export function HeroSection(_props: RoutableProps) {
             </h1>
 
             <p
-              className="uppercase text-[10px] md:text-sm tracking-[0.15em] text-text-tertiary font-[--font-body] animate-fade-up"
+              className="uppercase text-[10px] md:text-sm tracking-[0.15em] text-text-tertiary font-(--font-body) animate-fade-up"
               style={{ animationDelay: "200ms" }}
             >
               software engineer | problem solver | tech enthusiast
