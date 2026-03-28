@@ -2,7 +2,7 @@ import { trackSocialClick } from "@/utils/analytics";
 
 export function GetInTouch() {
   return (
-    <div className="animate-fade-up flex flex-col gap-3" style={{ animationDelay: "400ms" }}>
+    <div className="animate-fade-up flex flex-col gap-1.5" style={{ animationDelay: "400ms" }}>
       <span className="uppercase text-xs tracking-[0.15em] text-text-tertiary">get in touch</span>
       <a
         href="mailto:me@felix-hzv.dev"

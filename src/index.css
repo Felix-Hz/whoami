@@ -34,7 +34,7 @@
   --grain-opacity: 0.03;
 }
 
-/* Dark mode (prepared, not wired up yet) */
+/* Dark mode */
 :root[data-theme="dark"] {
   --color-surface-primary: #0a0a0a;
   --color-surface-elevated: #171717;
@@ -156,7 +156,7 @@ h1 {
   line-height: 0.75;
   padding-right: 0.08em;
   margin-top: 0.05em;
-  color: var(--color-text-primary);
+  color: var(--color-accent);
 }
 
 .drop-cap::first-line {
