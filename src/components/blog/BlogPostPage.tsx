@@ -78,17 +78,23 @@ export function BlogPostPage({ slug }: BlogPostPageProps) {
           </h1>
 
           {post.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-4">
+            <div className="flex flex-wrap gap-2 mt-2">
               {post.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="text-xs text-text-tertiary bg-accent-subtle px-2 py-0.5 rounded-sm tracking-wide"
+                  className="text-[10px] text-accent border border-accent/20 bg-accent-subtle px-2 py-0.5 rounded-sm tracking-wide"
                 >
                   {tag}
                 </span>
               ))}
             </div>
           )}
+
+          <div className="mt-6 flex items-center gap-3 text-text-tertiary/40" aria-hidden="true">
+            <span className="flex-1 h-px bg-border" />
+            <span className="text-[10px] tracking-[0.3em]">***</span>
+            <span className="flex-1 h-px bg-border" />
+          </div>
         </header>
 
         {post.coverImage && (
@@ -99,6 +105,9 @@ export function BlogPostPage({ slug }: BlogPostPageProps) {
               className="w-full aspect-[21/9] object-cover rounded-sm"
               loading="eager"
             />
+            {post.coverImageCredit && (
+              <p className="mt-2 text-xs text-text-tertiary text-right tracking-wide italic">{post.coverImageCredit}</p>
+            )}
           </div>
         )}
 

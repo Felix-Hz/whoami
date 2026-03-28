@@ -8,5 +8,6 @@ export interface BlogPost {
   tags: string[];
   publishedAt: string;
   coverImage: string | null;
+  coverImageCredit: string | null;
   readingTime: number;
 }
