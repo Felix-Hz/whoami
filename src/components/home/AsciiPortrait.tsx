@@ -27,7 +27,7 @@ export function AsciiPortrait({ compact = false }: AsciiPortraitProps) {
         </div>
 
         {/* ASCII face */}
-        <div className={`bg-surface-primary ${compact ? "p-2" : "p-3"}`}>
+        <div className={`bg-surface-primary flex justify-center ${compact ? "p-2" : "p-3"}`}>
           <pre
             aria-hidden="true"
             className={`group font-mono overflow-hidden leading-none cursor-default select-none ${

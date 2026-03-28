@@ -1,6 +1,7 @@
 import type { RoutableProps } from "preact-router";
 import { AsciiPortrait } from "./AsciiPortrait";
 import { GetInTouch } from "./GetInTouch";
+import { Projects } from "./Projects";
 
 const NAME = "felix hernandez vieyra";
 
@@ -17,43 +18,51 @@ export function HeroSection(_props: RoutableProps) {
         </div>
 
         {/* Text column */}
-        <div className="lg:col-span-7 flex flex-col items-start gap-4 text-left">
-          <h1
-            className="group text-5xl md:text-7xl lg:text-[7rem] text-text-primary antialiased tracking-[-0.06em] leading-[0.9] animate-fade-up cursor-default"
-            style={{ animationDelay: "100ms" }}
-          >
-            {NAME.split("").map((char, i) =>
-              char === " " ? (
-                <span key={i}>&nbsp;</span>
-              ) : (
-                <span
-                  key={i}
-                  className="transition-colors duration-normal group-hover:text-accent"
-                  style={{ transitionDelay: `${i * 25}ms` }}
-                >
-                  {char}
-                </span>
-              ),
-            )}
-          </h1>
+        <div className="lg:col-span-7 flex flex-col items-start gap-8 md:gap-10 text-left">
+          <div className="flex flex-col gap-3 md:gap-0">
+            <h1
+              className="group text-[2.75rem] md:text-7xl lg:text-[7rem] text-text-primary antialiased tracking-[-0.06em] leading-[0.85] md:leading-[0.9] animate-fade-up cursor-default"
+              style={{ animationDelay: "100ms" }}
+            >
+              {NAME.split("").map((char, i) =>
+                char === " " ? (
+                  <span key={i}>&nbsp;</span>
+                ) : (
+                  <span
+                    key={i}
+                    className="transition-colors duration-normal group-hover:text-accent"
+                    style={{ transitionDelay: `${i * 25}ms` }}
+                  >
+                    {char}
+                  </span>
+                ),
+              )}
+            </h1>
 
-          <p
-            className="uppercase text-xs md:text-sm tracking-[0.15em] text-text-tertiary font-[var(--font-body)] hidden md:block animate-fade-up"
-            style={{ animationDelay: "200ms" }}
-          >
-            software engineer | web-application developer | tech enthusiast
-          </p>
+            <p
+              className="uppercase text-[10px] md:text-sm tracking-[0.15em] text-text-tertiary font-[--font-body] animate-fade-up"
+              style={{ animationDelay: "200ms" }}
+            >
+              software engineer | problem solver | tech enthusiast
+            </p>
 
-          <p
-            className="text-base md:text-lg text-text-secondary max-w-2xl leading-[1.7] md:leading-[1.8] py-0 md:py-4 text-left animate-fade-up"
-            style={{ animationDelay: "300ms" }}
-          >
-            passionate about building software that solves users' problems. love the bleeding-edge, firm believer in
-            perpetual learning. design software for humans. architect solutions for resilience. security must be part of
-            the mvp. simple is better than complex. complex is better than complicated. actions transmit values better
-            than words.
-          </p>
+            <p
+              className="text-base md:text-lg text-text-secondary max-w-2xl leading-[1.7] md:leading-[1.8] pt-2 md:py-4 text-left animate-fade-up"
+              style={{ animationDelay: "300ms" }}
+            >
+              design software for humans, architect solutions for resilience. security must be part of the mvp.{" "}
+              <a
+                href="https://peps.python.org/pep-0020/#the-zen-of-python"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-text-primary underline decoration-accent/40 underline-offset-4 decoration-1 transition-colors duration-normal hover:text-accent hover:decoration-accent"
+              >
+                simple is better than complex, complex is better than complicated.
+              </a>
+            </p>
+          </div>
 
+          <Projects />
           <GetInTouch />
         </div>
 
