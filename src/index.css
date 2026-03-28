@@ -141,6 +141,109 @@ h1 {
   font-family: var(--font-display);
 }
 
+/* ------------------------------------------------------------------ */
+/* Drop Cap                                                            */
+/* ------------------------------------------------------------------ */
+
+.drop-cap {
+  font-size: 1.125rem;
+}
+
+.drop-cap::first-letter {
+  font-family: "Pirata One", cursive;
+  float: left;
+  font-size: 3.8em;
+  line-height: 0.75;
+  padding-right: 0.08em;
+  margin-top: 0.05em;
+  color: var(--color-text-primary);
+}
+
+.drop-cap::first-line {
+  font-variant: small-caps;
+  letter-spacing: 0.05em;
+  color: var(--color-text-primary);
+}
+
+/* ------------------------------------------------------------------ */
+/* Custom List Markers                                                 */
+/* ------------------------------------------------------------------ */
+
+.editorial-list {
+  list-style: none;
+  padding-left: 1.25rem;
+}
+
+.editorial-list li {
+  position: relative;
+}
+
+.editorial-list li::before {
+  content: "▪";
+  position: absolute;
+  left: -1.25rem;
+  color: var(--color-accent);
+}
+
+/* ------------------------------------------------------------------ */
+/* End Mark                                                            */
+/* ------------------------------------------------------------------ */
+
+.end-mark {
+  text-align: center;
+  color: var(--color-accent);
+  font-size: 0.75rem;
+  letter-spacing: 0.5em;
+  margin-top: 3rem;
+  margin-bottom: 1rem;
+}
+
+/* ------------------------------------------------------------------ */
+/* Editorial Blockquote                                                */
+/* ------------------------------------------------------------------ */
+
+.editorial-blockquote {
+  position: relative;
+  border-left: none;
+  margin: 2.5rem 0;
+  padding: 1.5rem 0;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.editorial-blockquote::before {
+  content: "\201C";
+  font-family: "Pirata One", cursive;
+  font-size: 4rem;
+  line-height: 1;
+  color: var(--color-accent);
+  position: absolute;
+  top: 0.5rem;
+  left: -0.15em;
+}
+
+.editorial-blockquote p {
+  font-size: 1.25rem;
+  line-height: 1.6;
+  font-style: italic;
+  padding-left: 2rem;
+  color: var(--color-text-secondary);
+}
+
+/* ------------------------------------------------------------------ */
+/* Section Divider                                                     */
+/* ------------------------------------------------------------------ */
+
+.section-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  color: var(--color-text-tertiary);
+  font-size: 0.75rem;
+  letter-spacing: 0.3em;
+}
+
 h2 {
   font-family: var(--font-heading);
   font-weight: 400;
