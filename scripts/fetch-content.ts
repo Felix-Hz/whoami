@@ -28,6 +28,7 @@ interface SanityPost {
   tags: string[] | null;
   publishedAt: string;
   coverImage: string | null;
+  coverImageCredit: string | null;
 }
 
 const QUERY = `*[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && defined(publishedAt) && defined(excerpt)] | order(publishedAt desc) {
@@ -37,7 +38,8 @@ const QUERY = `*[_type == "post" && !(_id in path("drafts.**")) && defined(slug.
   body,
   tags,
   publishedAt,
-  "coverImage": mainImage.asset->url
+  "coverImage": mainImage.asset->url,
+  coverImageCredit
 }`;
 
 function countWords(blocks: unknown[]): number {
@@ -63,6 +65,7 @@ async function main() {
   const enriched = posts.map((post) => ({
     ...post,
     tags: post.tags ?? [],
+    coverImageCredit: post.coverImageCredit ?? null,
     readingTime: Math.max(1, Math.round(countWords(post.body ?? []) / 200)),
   }));
 

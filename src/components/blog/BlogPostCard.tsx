@@ -30,11 +30,11 @@ export function BlogPostCard({ post, index }: { post: BlogPost; index: number })
         )}
 
         {post.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-1">
+          <div className="flex flex-wrap gap-2 mt-2">
             {post.tags.map((tag) => (
               <span
                 key={tag}
-                className="text-xs text-text-tertiary bg-accent-subtle px-2 py-0.5 rounded-sm tracking-wide"
+                className="text-[10px] text-accent border border-accent/20 bg-accent-subtle px-2 py-0.5 rounded-sm tracking-wide"
               >
                 {tag}
               </span>
