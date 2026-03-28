@@ -54,10 +54,8 @@ function injectMeta(html: string, meta: { title: string; description: string; ur
 
   if (meta.image) {
     out = out.replace(/(<meta\s+name="twitter:card"\s+content=").*?(")/, "$1summary_large_image$2");
-    out = out.replace(
-      "</head>",
-      `<meta property="og:image" content="${escapeAttr(meta.image)}" />\n<meta name="twitter:image" content="${escapeAttr(meta.image)}" />\n</head>`,
-    );
+    out = out.replace(/(<meta\s+property="og:image"\s+content=").*?(")/, `$1${escapeAttr(meta.image)}$2`);
+    out = out.replace(/(<meta\s+name="twitter:image"\s+content=").*?(")/, `$1${escapeAttr(meta.image)}$2`);
   }
 
   return out;
