@@ -3,7 +3,7 @@ import type { RoutableProps } from "preact-router";
 import { getPostBySlug } from "@/data/posts";
 import { useHead } from "@/hooks/useHead";
 import { trackBlogPostView } from "@/utils/analytics";
-import { portableTextComponents } from "./PortableTextComponents";
+import { createPortableTextComponents } from "./PortableTextComponents";
 import { ShareLinks } from "./ShareLinks";
 
 interface BlogPostPageProps extends RoutableProps {
@@ -64,6 +64,10 @@ export function BlogPostPage({ slug }: BlogPostPageProps) {
 
         <header className="mb-10 animate-fade-up" style={{ animationDelay: "100ms" }}>
           <div className="flex items-center gap-3 text-xs text-text-tertiary tracking-wide mb-3">
+            <span className="font-[var(--font-heading)] text-sm tracking-normal text-text-secondary">
+              felix hernandez vieyra
+            </span>
+            <span aria-hidden="true">/</span>
             <time dateTime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
             <span aria-hidden="true">/</span>
             <span>{post.readingTime} min read</span>
@@ -92,14 +96,18 @@ export function BlogPostPage({ slug }: BlogPostPageProps) {
             <img
               src={`${post.coverImage}?w=960&fit=max&auto=format`}
               alt=""
-              className="w-full rounded-sm"
+              className="w-full aspect-[21/9] object-cover rounded-sm"
               loading="eager"
             />
           </div>
         )}
 
         <div className="text-base md:text-lg animate-fade-up" style={{ animationDelay: "200ms" }}>
-          <PortableText value={post.body} components={portableTextComponents} />
+          <PortableText value={post.body} components={createPortableTextComponents()} />
+        </div>
+
+        <div className="end-mark" aria-hidden="true">
+          &#9670;
         </div>
 
         <ShareLinks title={post.title} slug={post.slug} url={postUrl} />
