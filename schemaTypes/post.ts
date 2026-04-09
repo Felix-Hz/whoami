@@ -1,4 +1,4 @@
-import {defineField, defineType} from 'sanity'
+import {defineArrayMember, defineField, defineType} from 'sanity'
 
 export default defineType({
   name: 'post',
@@ -9,6 +9,7 @@ export default defineType({
       name: 'title',
       title: 'Title',
       type: 'string',
+      validation: (rule) => rule.required(),
     }),
     defineField({
       name: 'slug',
@@ -18,31 +19,43 @@ export default defineType({
         source: 'title',
         maxLength: 96,
       },
+      validation: (rule) => rule.required(),
     }),
     defineField({
-      name: 'author',
-      title: 'Author',
-      type: 'reference',
-      to: {type: 'author'},
+      name: 'excerpt',
+      title: 'Excerpt',
+      type: 'text',
+      rows: 3,
+      description: 'Short summary shown on the blog listing page.',
+      validation: (rule) => rule.required(),
     }),
     defineField({
       name: 'mainImage',
-      title: 'Main image',
+      title: 'Cover Image',
       type: 'image',
       options: {
         hotspot: true,
       },
     }),
     defineField({
-      name: 'categories',
-      title: 'Categories',
+      name: 'coverImageCredit',
+      title: 'Cover Image Credit',
+      type: 'string',
+      description: 'Photographer or source credit for the cover image.',
+    }),
+    defineField({
+      name: 'tags',
+      title: 'Tags',
       type: 'array',
-      of: [{type: 'reference', to: {type: 'category'}}],
+      of: [defineArrayMember({type: 'string'})],
+      options: {layout: 'tags'},
     }),
     defineField({
       name: 'publishedAt',
       title: 'Published at',
       type: 'datetime',
+      initialValue: () => new Date().toISOString(),
+      validation: (rule) => rule.required(),
     }),
     defineField({
       name: 'body',
@@ -50,16 +63,25 @@ export default defineType({
       type: 'blockContent',
     }),
   ],
-
+  orderings: [
+    {
+      title: 'Published Date',
+      name: 'publishedAt',
+      by: [{field: 'publishedAt', direction: 'desc'}],
+    },
+  ],
   preview: {
     select: {
       title: 'title',
-      author: 'author.name',
       media: 'mainImage',
+      date: 'publishedAt',
     },
-    prepare(selection) {
-      const {author} = selection
-      return {...selection, subtitle: author && `by ${author}`}
+    prepare({title, media, date}) {
+      return {
+        title,
+        media,
+        subtitle: date ? new Date(date).toLocaleDateString() : 'No date',
+      }
     },
   },
 })
