@@ -1,0 +1,114 @@
+# Weekly scans, Monday. Each ecosystem gets:
+#   - one grouped PR for all minor + patch updates (24h cooldown)
+#   - one PR per dependency for major updates (48h cooldown), except packages that must move
+#     in lockstep (preact + its renderer and preset, sanity + react, tailwind + its plugin), which
+#     share a single major PR
+# Groups match in order, so the *-major family groups sit above the minor-patch catch-all.
+#
+# github-actions and terraform only support a flat cooldown (no semver-*-days), so they wait
+# 2 days for every update to keep the 48h rule for majors.
+#
+# Auto-merge: every update except terraform, once ci-ok passes (dependabot-automerge.yml).
+# Branches: dependabot/<ecosystem>/<directory>/<dependency>-<version> (Dependabot default)
+# Titles:   chore(deps): bump the minor-patch group with 5 updates
+#           chore(deps): bump vite from 8.3.4 to 9.0.0
+version: 2
+
+updates:
+  # ── Site and studio (one pnpm workspace; the root covers studio/ too) ──
+
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    cooldown:
+      default-days: 1
+      semver-major-days: 2
+      semver-minor-days: 1
+      semver-patch-days: 1
+    commit-message:
+      prefix: "chore"
+      prefix-development: "chore"
+      include: "scope"
+    open-pull-requests-limit: 10
+    groups:
+      preact-major:
+        patterns:
+          - "preact"
+          - "preact-render-to-string"
+          - "@preact/*"
+        update-types:
+          - "major"
+      sanity-major:
+        patterns:
+          - "sanity"
+          - "@sanity/*"
+          - "react"
+          - "react-dom"
+          - "@types/react"
+          - "@types/react-dom"
+          - "styled-components"
+        update-types:
+          - "major"
+      tailwind-major:
+        patterns:
+          - "tailwindcss"
+          - "@tailwindcss/*"
+        update-types:
+          - "major"
+      minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    ignore:
+      # typescript-eslint (the studio's ESLint config) supports TypeScript below 6.1 only.
+      # Remove once it supports 7.
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
+      # 7.0 and up are compiled with the React Compiler and import react/compiler-runtime, which
+      # preact/compat doesn't provide. 6.x is the newest line that runs on Preact.
+      - dependency-name: "@portabletext/react"
+        update-types: ["version-update:semver-major"]
+
+  # ── CI and infrastructure ──
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    cooldown:
+      default-days: 2
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    open-pull-requests-limit: 10
+    groups:
+      actions-minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  - package-ecosystem: "terraform"
+    directory: "/infra"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    cooldown:
+      default-days: 2
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    open-pull-requests-limit: 10
+    groups:
+      terraform-minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"

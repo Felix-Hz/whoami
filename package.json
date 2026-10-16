@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "packageManager": "pnpm@12.11.2",
   "scripts": {
     "dev": "concurrently -k -n site,studio -c cyan,magenta \"pnpm dev:site\" \"pnpm dev:studio\"",
     "dev:site": "pnpm dev:fetch || echo \"content fetch failed, using existing src/generated/posts.json\"; vite",

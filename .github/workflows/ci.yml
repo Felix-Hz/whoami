@@ -1,0 +1,109 @@
+name: CI
+
+# Every pull request, Dependabot's included. ci-ok is the single check main requires: it fails if any
+# job below failed or was cancelled, so Dependabot's auto-merge only lands a green run.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: lint and types
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Sanity typegen drift check
+        run: |
+          pnpm typegen
+          git diff --exit-code src/generated/sanity.types.ts || (echo "::error::Schema or GROQ query changed without regenerating types. Run pnpm typegen and commit the result." && exit 1)
+
+      # The root tsconfig only references the app and node projects, so -b is what actually checks them
+      - name: TypeScript
+        run: pnpm exec tsc -b
+
+      - name: Biome
+        run: pnpm exec biome ci .
+
+      - name: Studio ESLint
+        run: pnpm --filter @whoami/studio exec eslint .
+
+  build:
+    name: build site
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # The project and dataset are public (they're in studio/sanity.config.ts and every image URL), so
+      # Dependabot's pull requests, which can't read Actions secrets, still build against real content
+      - name: Build website
+        env:
+          SANITY_PROJECT_ID: ${{ secrets.SANITY_PROJECT_ID || '4qw0kd9q' }}
+          SANITY_DATASET: ${{ secrets.SANITY_DATASET || 'production' }}
+        run: pnpm build
+
+      - name: Authoring leak check
+        run: pnpm check:leaks
+
+  studio:
+    name: build studio
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --filter @whoami/studio...
+
+      - name: Build studio
+        run: pnpm --filter @whoami/studio exec sanity build --yes
+
+  ci-ok:
+    name: ci-ok
+    if: always()
+    needs: [lint, build, studio]
+    runs-on: ubuntu-latest
+    steps:
+      - if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1
+      - run: echo "All CI jobs passed."

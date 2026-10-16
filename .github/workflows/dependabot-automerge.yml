@@ -1,0 +1,29 @@
+name: Dependabot auto-merge
+
+on: pull_request
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  automerge:
+    name: dependabot-automerge
+    # Not github.actor: a "@dependabot rebase" comment makes the commenter the actor.
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - id: meta
+        uses: dependabot/fetch-metadata@v3
+
+      # Every update type, majors included: --auto only merges once main's required check (ci-ok)
+      # passes, so a breaking bump stays open with red CI.
+      # Terraform is excluded because a merge to main runs terraform apply (build-and-deploy.yml).
+      - name: Enable auto-merge
+        if: steps.meta.outputs.package-ecosystem != 'terraform'
+        run: gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          # Merges made with GITHUB_TOKEN don't trigger push workflows, so Build & Deploy wouldn't run.
+          # A fine-grained PAT stored as the Dependabot secret AUTOMERGE_TOKEN fixes that.
+          GH_TOKEN: ${{ secrets.AUTOMERGE_TOKEN || secrets.GITHUB_TOKEN }}
