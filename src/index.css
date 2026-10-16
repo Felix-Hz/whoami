@@ -569,36 +569,40 @@ a {
   display: none;
 }
 
-/* The name answers the pointer with its own contrast: a soft paper halo that hugs each letterform and
-   lifts it off the dither, instead of clearing a box behind it. Touch screens keep a lighter one at rest. */
-.name-halo {
-  --halo:
-    0 0 0.02em var(--color-paper), 0 0 0.05em var(--color-paper), 0 0 0.1em var(--color-paper),
-    0 0 0.18em var(--color-paper);
-  text-shadow:
-    0 0 0 transparent,
-    0 0 0 transparent,
-    0 0 0 transparent,
-    0 0 0 transparent;
-  transition: text-shadow 450ms var(--ease-out);
+/* Theme button: the moon in light (switch to dark), the sun in dark (switch to light) */
+.theme-toggle .theme-sun {
+  display: none;
 }
 
-@media (hover: hover) {
-  .name-halo:hover {
-    text-shadow: var(--halo);
+:root[data-theme="dark"] .theme-toggle .theme-sun {
+  display: block;
+}
+
+:root[data-theme="dark"] .theme-toggle .theme-moon {
+  display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .theme-toggle .theme-sun {
+    display: block;
+  }
+
+  :root:not([data-theme="light"]) .theme-toggle .theme-moon {
+    display: none;
   }
 }
 
-@media (hover: none) {
-  .name-halo {
-    text-shadow:
-      0 0 0.02em var(--color-paper),
-      0 0 0.06em var(--color-paper);
-  }
+/* The knob's pointer turns with a short ease, like a real dial settling; never under reduced motion */
+.dither-knob .knob-pointer {
+  transition: transform 140ms var(--ease-out);
+}
+
+.dither-knob:focus-visible {
+  outline-offset: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .name-halo {
+  .dither-knob .knob-pointer {
     transition: none;
   }
 }

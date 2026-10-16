@@ -29,12 +29,12 @@ const defaultHead: HeadMeta = {
 };
 
 // Must mirror App's tree (Layout > div > page), or hydration throws the prerendered DOM away
-function page(content: ReturnType<typeof h>) {
-  return h(Layout, null, h("div", null, content));
+function page(content: ReturnType<typeof h>, home = false) {
+  return h(Layout, { home }, h("div", null, content));
 }
 
 const routes: Route[] = [
-  { path: "/", element: page(h(HeroSection, null)) },
+  { path: "/", element: page(h(HeroSection, null), true) },
   { path: "/blog", element: page(h(BlogListPage, null)) },
 ];
 

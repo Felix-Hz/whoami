@@ -25,7 +25,7 @@ const TEXT_CLEAR = 1 - (1 - PORTRAIT_CLEAR) * 0.85;
 const VERT = "attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}";
 const FRAG = `precision highp float;
 uniform vec2 r;uniform float t;uniform vec2 m;uniform float mi;uniform vec3 ink;uniform vec3 paper;
-uniform float scroll;uniform vec4 H;
+uniform float scroll;uniform vec4 H;uniform float gain;
 uniform vec4 L[${MAX_BOXES}];uniform vec4 P[${MAX_BOXES}];uniform float pad;
 float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1.,0.)),f.x),mix(h(i+vec2(0.,1.)),h(i+vec2(1.,1.)),f.x),f.y);}
@@ -43,7 +43,10 @@ void main(){
   // One quiet field across the whole page: sparse, kept to the left margin. inHero only tunes the lens below.
   float hy=(px.y-H.y)/max(1.,H.w-H.y);
   float inHero=step(0.,hy)*step(hy,1.)*smoothstep(0.,.22,hy)*smoothstep(0.,.08,1.-hy);
-  float v=pow(n0,3.)*.2*(1.-smoothstep(.02,.32,x));
+  // gain is the knob in the header: 1 at its default, about 3 turned all the way up
+  // Above the default the field also spreads: from the left margin at 1 to the whole width at the top
+  float spread=clamp((gain-1.)/3.6,0.,1.);
+  float v=pow(n0,3.)*.2*gain*(1.-smoothstep(.02,mix(.32,1.25,spread),x));
   float k=0.;
   for(int i=0;i<${MAX_BOXES};i++){
     vec4 q=L[i];if(q.z<=q.x)continue;vec4 s=P[i];
@@ -88,6 +91,16 @@ interface Block {
   oy: number;
 }
 
+export interface DitherHandle {
+  // Tears everything down, context included; only for leaving the page
+  stop: () => void;
+  // Live density from the knob; 1 is the designed default
+  setGain: (gain: number) => void;
+  // The knob's on/off: pauses rendering and shows the static grid, keeping the GL context alive,
+  // because a canvas can't get a fresh context once its old one has been released
+  setEnabled: (on: boolean) => void;
+}
+
 export interface DitherOptions {
   canvas: HTMLCanvasElement;
   hero: HTMLElement;
@@ -98,6 +111,7 @@ export interface DitherOptions {
   // Kept thin behind the portrait until the hero scrolls away
   portrait?: HTMLElement | null;
   progress: () => number;
+  gain?: number;
 }
 
 function parseColor(value: string): [number, number, number] {
@@ -223,7 +237,7 @@ async function compile(gl: WebGLRenderingContext) {
   gl.enableVertexAttribArray(attr);
   gl.vertexAttribPointer(attr, 2, gl.FLOAT, false, 0, 0);
   return Object.fromEntries(
-    ["r", "t", "m", "mi", "ink", "paper", "scroll", "H", "L", "P", "pad"].map((k) => [
+    ["r", "t", "m", "mi", "ink", "paper", "scroll", "H", "gain", "L", "P", "pad"].map((k) => [
       k,
       gl.getUniformLocation(program, k),
     ]),
@@ -255,12 +269,14 @@ export async function startDither({
   quiet = [],
   portrait,
   progress,
-}: DitherOptions): Promise<(() => void) | null> {
+  gain = 1,
+}: DitherOptions): Promise<DitherHandle | null> {
   const gl = canvas.getContext("webgl", { antialias: false, alpha: false, powerPreference: "low-power" });
   if (!gl) return null;
   const u = await compile(gl);
   if (!u) return null;
   gl.uniform1f(u.pad, PAD * SCALE);
+  gl.uniform1f(u.gain, gain);
 
   // Hero type first, so it always wins a slot when the page has more type on screen than the GPU has room for
   const blocks: Block[] = [
@@ -373,8 +389,10 @@ export async function startDither({
     blocks.some((b) => b.open || b.rd.x > 0) ||
     performance.now() - lastActive < 600;
 
+  let enabled = true;
+
   const loop = (now: number) => {
-    if (document.hidden) {
+    if (document.hidden || !enabled) {
       raf = 0;
       return;
     }
@@ -385,7 +403,7 @@ export async function startDither({
     raf = requestAnimationFrame(loop);
   };
   const resume = () => {
-    if (raf || document.hidden) return;
+    if (raf || document.hidden || !enabled) return;
     clock.reset();
     raf = requestAnimationFrame(loop);
   };
@@ -457,7 +475,7 @@ export async function startDither({
     resume();
   });
 
-  return () => {
+  const stop = () => {
     cancelAnimationFrame(raf);
     resizer.disconnect();
     themeAttr.disconnect();
@@ -469,6 +487,32 @@ export async function startDither({
     canvas.removeEventListener("webglcontextlost", onLost);
     gl.getExtension("WEBGL_lose_context")?.loseContext();
     canvas.style.transform = "";
+    canvas.style.visibility = "";
     delete hero.dataset.dither;
   };
+
+  const setGain = (next: number) => {
+    gl.uniform1f(u.gain, next);
+    lastActive = performance.now();
+    if (enabled) draw(performance.now());
+  };
+
+  const setEnabled = (on: boolean) => {
+    if (on === enabled) return;
+    enabled = on;
+    canvas.style.visibility = on ? "" : "hidden";
+    if (on) {
+      measure();
+      draw(performance.now());
+      hero.dataset.dither = "on";
+      resume();
+    } else {
+      cancelAnimationFrame(raf);
+      raf = 0;
+      // Anything but "on" brings the static grid back (see .hero-poster in index.css)
+      hero.dataset.dither = "off";
+    }
+  };
+
+  return { stop, setGain, setEnabled };
 }

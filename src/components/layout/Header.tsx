@@ -1,5 +1,7 @@
 import { useRef } from "preact/hooks";
+import { DitherKnob } from "@/components/ui/DitherKnob";
 import { Logo } from "@/components/ui/Logo";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { trackSocialClick } from "@/utils/analytics";
 import { CHAPTERS, OUTBOUND } from "./links";
 
@@ -38,7 +40,17 @@ function Outbound() {
   );
 }
 
-export function Header() {
+// The knob only exists where the field does: the home page
+function Controls({ home }: { home: boolean }) {
+  return (
+    <>
+      {home && <DitherKnob />}
+      <ThemeToggle />
+    </>
+  );
+}
+
+export function Header({ home = false }: { home?: boolean }) {
   const menu = useRef<HTMLDetailsElement>(null);
   const close = () => {
     if (menu.current) menu.current.open = false;
@@ -58,26 +70,34 @@ export function Header() {
         <div className="flex gap-6 ml-7 pl-7 border-l border-rule">
           <Outbound />
         </div>
+        <div className="flex items-center gap-1 ml-5 pl-4 border-l border-rule self-center">
+          <Controls home={home} />
+        </div>
       </nav>
 
       {/* Phones: one quiet toggle; works without JS because it's a <details> */}
-      <details ref={menu} className="md:hidden col-span-2 justify-self-end group">
-        <summary className="meta text-ink-2 list-none cursor-pointer select-none py-3 -my-3 [&::-webkit-details-marker]:hidden">
-          index <span className="font-pixel text-accent group-open:hidden">+</span>
-          <span className="font-pixel text-accent hidden group-open:inline">−</span>
-        </summary>
-        <nav
-          aria-label="Main"
-          className="absolute left-0 right-0 top-full z-30 bg-paper border-b border-rule px-gutter pt-2 pb-6 font-mono text-small text-ink-2 flex flex-col"
-        >
-          <div className="flex flex-col [&>a]:py-2.5 [&>a]:border-b [&>a]:border-rule">
-            <Chapters onNavigate={close} />
-          </div>
-          <div className="flex gap-6 pt-4">
-            <Outbound />
-          </div>
-        </nav>
-      </details>
+      <div className="md:hidden col-span-2 justify-self-end flex items-center">
+        <div className="flex items-center gap-0.5 mr-3 pr-3 border-r border-rule">
+          <Controls home={home} />
+        </div>
+        <details ref={menu} className="group">
+          <summary className="meta text-ink-2 list-none cursor-pointer select-none py-3 -my-3 [&::-webkit-details-marker]:hidden">
+            index <span className="font-pixel text-accent group-open:hidden">+</span>
+            <span className="font-pixel text-accent hidden group-open:inline">−</span>
+          </summary>
+          <nav
+            aria-label="Main"
+            className="absolute left-0 right-0 top-full z-30 bg-paper border-b border-rule px-gutter pt-2 pb-6 font-mono text-small text-ink-2 flex flex-col"
+          >
+            <div className="flex flex-col [&>a]:py-2.5 [&>a]:border-b [&>a]:border-rule">
+              <Chapters onNavigate={close} />
+            </div>
+            <div className="flex gap-6 pt-4">
+              <Outbound />
+            </div>
+          </nav>
+        </details>
+      </div>
     </header>
   );
 }
