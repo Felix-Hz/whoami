@@ -5,6 +5,8 @@ export default defineCliConfig({
     projectId: '4qw0kd9q',
     dataset: 'production'
   },
+  // Hosted at https://felixhzv.sanity.studio, deployed by .github/workflows/studio-deploy.yml
+  studioHost: 'felixhzv',
   deployment: {
     /**
      * Enable auto-updates for studios.

@@ -3,6 +3,29 @@ import { getPostBySlug } from "@/data/posts";
 import { DeployStatus } from "./DeployStatus";
 
 const STUDIO = __AUTHORING_STUDIO_URL__.replace(/\/$/, "");
+const COLLAPSED_KEY = "authoring:collapsed";
+
+function readCollapsed(): boolean {
+  try {
+    return localStorage.getItem(COLLAPSED_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function useCollapsed() {
+  const [collapsed, setCollapsed] = useState(readCollapsed);
+  const toggle = () =>
+    setCollapsed((value) => {
+      try {
+        localStorage.setItem(COLLAPSED_KEY, value ? "0" : "1");
+      } catch {
+        // Storage blocked; the toggle still works for this page view
+      }
+      return !value;
+    });
+  return [collapsed, toggle] as const;
+}
 
 function RefreshButton() {
   const [state, setState] = useState<"idle" | "busy" | "error">("idle");
@@ -27,6 +50,7 @@ export function Toolbar({ url }: { url: string }) {
   const path = url.split(/[?#]/)[0].replace(/\/$/, "") || "/";
   const slug = path.match(/^\/blog\/([^/]+)$/)?.[1];
   const post = slug ? getPostBySlug(slug) : undefined;
+  const [collapsed, toggle] = useCollapsed();
 
   if (path !== "/blog" && !slug) return null;
 
@@ -36,9 +60,18 @@ export function Toolbar({ url }: { url: string }) {
       className="authoring-toolbar fixed bottom-4 right-4 z-50 flex flex-col gap-2 items-end font-[var(--font-mono)] text-xs bg-surface-elevated text-text-primary border border-border-strong p-2 [&_a]:underline [&_button]:underline [&_button]:cursor-pointer [&_button:disabled]:opacity-50"
     >
       <div className="flex items-center gap-3">
-        <span className="text-text-tertiary">dev</span>
-        <RefreshButton />
-        {path === "/blog" && (
+        <button
+          type="button"
+          onClick={toggle}
+          aria-expanded={!collapsed}
+          aria-controls="authoring-tools"
+          title={collapsed ? "Show dev tools" : "Collapse dev tools"}
+          className="text-text-tertiary !no-underline"
+        >
+          {collapsed ? "dev ▸" : "dev ▾"}
+        </button>
+        {!collapsed && <RefreshButton />}
+        {!collapsed && path === "/blog" && (
           <>
             <a
               href={`${STUDIO}/intent/create/type=post;template=post/`}
@@ -53,7 +86,7 @@ export function Toolbar({ url }: { url: string }) {
             </a>
           </>
         )}
-        {post && (
+        {!collapsed && post && (
           <a
             href={`${STUDIO}/intent/edit/id=${post._id};type=post/`}
             target="_blank"
@@ -64,7 +97,9 @@ export function Toolbar({ url }: { url: string }) {
           </a>
         )}
       </div>
-      <DeployStatus />
+      <div id="authoring-tools" hidden={collapsed}>
+        <DeployStatus />
+      </div>
     </aside>
   );
 }

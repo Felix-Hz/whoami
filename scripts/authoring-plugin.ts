@@ -30,6 +30,12 @@ function toStatus(run: GitHubRun): DeployStatus {
   return "failed";
 }
 
+function githubError(res: Response): string {
+  if (res.status !== 403 && res.status !== 429) return `GitHub API ${res.status}`;
+  const reset = Number(res.headers.get("x-ratelimit-reset")) * 1000;
+  return `GitHub rate limit reached${reset ? ` until ${new Date(reset).toLocaleTimeString()}` : ""}`;
+}
+
 function json(res: ServerResponse, status: number, body: unknown) {
   res.statusCode = status;
   res.setHeader("Content-Type", "application/json");
@@ -49,24 +55,38 @@ export function authoring(): Plugin {
   let env: Record<string, string> = {};
   let deploysCache: { at: number; body: unknown } | undefined;
 
+  // Per-workflow ETag and last run, reused on 304s; conditional requests don't count against the rate limit
+  const conditional = new Map<string, { etag: string; run: GitHubRun | undefined }>();
+
+  async function latestRun(file: string): Promise<GitHubRun | undefined> {
+    const repo = env.GITHUB_REPOSITORY || "Felix-Hz/whoami";
+    const headers: Record<string, string> = {
+      Accept: "application/vnd.github+json",
+      "X-GitHub-Api-Version": "2022-11-28",
+    };
+    if (env.GITHUB_TOKEN) headers.Authorization = `Bearer ${env.GITHUB_TOKEN}`;
+    const cached = conditional.get(file);
+    if (cached) headers["If-None-Match"] = cached.etag;
+
+    const res = await fetch(`https://api.github.com/repos/${repo}/actions/workflows/${file}/runs?per_page=1`, {
+      headers,
+    });
+    if (res.status === 304) return cached?.run;
+    if (!res.ok) throw new Error(githubError(res));
+
+    const run = ((await res.json()) as { workflow_runs: GitHubRun[] }).workflow_runs[0];
+    const etag = res.headers.get("etag");
+    if (etag) conditional.set(file, { etag, run });
+    return run;
+  }
+
+  // The repo is public, so this works without a token (60 requests/hour). A token only raises the limit.
   async function readDeploys() {
-    const token = env.GITHUB_TOKEN;
-    if (!token) return { enabled: false };
     if (deploysCache && Date.now() - deploysCache.at < 5_000) return deploysCache.body;
 
-    const repo = env.GITHUB_REPOSITORY || "Felix-Hz/whoami";
     const runs = await Promise.all(
       WORKFLOWS.map(async ({ file, name }) => {
-        const res = await fetch(`https://api.github.com/repos/${repo}/actions/workflows/${file}/runs?per_page=1`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: "application/vnd.github+json",
-            "X-GitHub-Api-Version": "2022-11-28",
-          },
-        });
-        if (!res.ok) return { name, error: `GitHub API ${res.status}` };
-        const { workflow_runs } = (await res.json()) as { workflow_runs: GitHubRun[] };
-        const run = workflow_runs[0];
+        const run = await latestRun(file);
         if (!run) return { name, status: null };
         return {
           name,
