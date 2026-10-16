@@ -557,7 +557,7 @@ a {
   pointer-events: none;
   background-image: radial-gradient(circle, var(--color-accent) 0.9px, transparent 1.15px);
   background-size: 6px 6px;
-  mask-image: linear-gradient(to left, transparent 55%, rgb(0 0 0 / 0.18) 80%, rgb(0 0 0 / 0.35));
+  mask-image: linear-gradient(to left, transparent 70%, rgb(0 0 0 / 0.12) 88%, rgb(0 0 0 / 0.22));
 }
 
 .hero-poster[data-dither="on"]::before {

@@ -4,7 +4,7 @@ import { frameClock, type Spring, spring, spring0 } from "./spring";
  * The home page's one background: a 1-bit ordered dither of slow noise, printed in the accent ink at a
  * third of the CSS resolution and scaled up pixelated, like a risograph. One fixed canvas behind the
  * whole page; the pattern is anchored to the page, so it scrolls with the content. Its jobs:
- *  - give the hero a printed texture, densest on the left, and every other section a faint one;
+ *  - give the page a faint printed texture along its left margin;
  *  - get out of the way of type: small type always keeps a soft clearing, and pointing at the hero's
  *    thesis clears the dither behind it, opening from the pointer (the name answers with its own halo, in CSS);
  *  - answer the pointer everywhere: a small lens that prints the field's negative wherever it passes;
@@ -36,14 +36,10 @@ void main(){
   vec2 uv=pg/r.x*1.6;
   float n0=.6*n(uv*2.6+vec2(0.,t*.035))+.4*n(uv*6.-vec2(t*.03,0.));
   float x=px.x/r.x;
-  // The hero, as designed: densest at the left edge, fading before the portrait, and out toward its
-  // bottom and top edges
+  // One quiet field across the whole page: sparse, kept to the left margin. inHero only tunes the lens below.
   float hy=(px.y-H.y)/max(1.,H.w-H.y);
   float inHero=step(0.,hy)*step(hy,1.)*smoothstep(0.,.22,hy)*smoothstep(0.,.08,1.-hy);
-  float hero=pow(n0,2.6)*.72*(1.-smoothstep(.02,.5,x));
-  // Every other section: a quieter echo of it, sparser and kept to the left margin
-  float rest=pow(n0,3.)*.2*(1.-smoothstep(.02,.32,x));
-  float v=mix(rest*(1.-step(0.,hy)*step(hy,1.)),hero,inHero);
+  float v=pow(n0,3.)*.2*(1.-smoothstep(.02,.32,x));
   float k=0.;
   for(int i=0;i<${MAX_BOXES};i++){
     vec4 q=L[i];if(q.z<=q.x)continue;vec4 s=P[i];
