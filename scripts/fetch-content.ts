@@ -4,7 +4,11 @@ import process from "node:process";
 import { fileURLToPath } from "node:url";
 import { createClient } from "@sanity/client";
 import { createCssVariablesTheme, createHighlighter } from "shiki";
-import type { POSTS_QUERY_RESULT } from "../src/generated/sanity.types";
+import type {
+  POSTS_QUERY_RESULT,
+  PREVIEW_POSTS_QUERY_RESULT,
+  PUBLISHED_POST_IDS_QUERY_RESULT,
+} from "../src/generated/sanity.types";
 import { POSTS_QUERY, PREVIEW_POSTS_QUERY, PUBLISHED_POST_IDS_QUERY } from "../src/queries";
 
 export interface FetchOptions {
@@ -59,8 +63,9 @@ function highlightCode(blocks: unknown[], hl: Highlighter): unknown[] {
 
 async function fetchPreview(client: ReturnType<typeof createClient>): Promise<Post[]> {
   const [posts, publishedIds] = await Promise.all([
-    client.fetch(PREVIEW_POSTS_QUERY, {}, { perspective: "drafts" }),
-    client.fetch(PUBLISHED_POST_IDS_QUERY, {}, { perspective: "raw" }),
+    // Result types come from typegen (typed by hand here, since its client overloads are off)
+    client.fetch<PREVIEW_POSTS_QUERY_RESULT>(PREVIEW_POSTS_QUERY, {}, { perspective: "drafts" }),
+    client.fetch<PUBLISHED_POST_IDS_QUERY_RESULT>(PUBLISHED_POST_IDS_QUERY, {}, { perspective: "raw" }),
   ]);
   const published = new Set(publishedIds);
 
@@ -83,7 +88,7 @@ export async function fetchPosts({ projectId, dataset = "production", previewTok
     apiVersion: "2025-02-06",
   });
 
-  const posts: Post[] = previewToken ? await fetchPreview(client) : await client.fetch(POSTS_QUERY);
+  const posts: Post[] = previewToken ? await fetchPreview(client) : await client.fetch<POSTS_QUERY_RESULT>(POSTS_QUERY);
   highlighter ??= createHighlighter({ themes: [THEME], langs: LANGS });
   const hl = await highlighter;
 

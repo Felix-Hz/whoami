@@ -259,13 +259,3 @@ export type PREVIEW_POSTS_QUERY_RESULT = Array<{
 // Variable: PUBLISHED_POST_IDS_QUERY
 // Query: *[_type == "post" && !(_id in path("drafts.**"))]._id
 export type PUBLISHED_POST_IDS_QUERY_RESULT = Array<string>;
-
-// Query TypeMap
-import "@sanity/client";
-declare module "@sanity/client" {
-  interface SanityQueries {
-    '*[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && defined(publishedAt) && defined(excerpt)] | order(publishedAt desc) {\n  _id,\n  title,\n  "slug": slug.current,\n  excerpt,\n  body,\n  tags,\n  publishedAt,\n  "coverImage": mainImage.asset->url,\n  coverImageCredit\n}': POSTS_QUERY_RESULT;
-    '*[_type == "post" && defined(slug.current)] | order(coalesce(publishedAt, _createdAt) desc) {\n  _id,\n  _originalId,\n  "title": coalesce(title, "untitled"),\n  "slug": slug.current,\n  "excerpt": coalesce(excerpt, ""),\n  body,\n  tags,\n  "publishedAt": coalesce(publishedAt, _createdAt),\n  "coverImage": mainImage.asset->url,\n  coverImageCredit\n}': PREVIEW_POSTS_QUERY_RESULT;
-    '*[_type == "post" && !(_id in path("drafts.**"))]._id': PUBLISHED_POST_IDS_QUERY_RESULT;
-  }
-}

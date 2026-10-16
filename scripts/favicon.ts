@@ -50,7 +50,7 @@ const MARK_H = DOLLAR.length;
 function tile(grid: number): string {
   const ox = Math.floor((grid - MARK_W) / 2);
   const oy = Math.floor((grid - MARK_H) / 2);
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${grid} ${grid}" shape-rendering="crispEdges"><rect width="${grid}" height="${grid}" fill="${INK}"/><path fill="${PAPER}" d="${markPath(ox, oy)}"/></svg>
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${grid} ${grid}" shape-rendering="crispEdges"><title>whoami</title><rect width="${grid}" height="${grid}" fill="${INK}"/><path fill="${PAPER}" d="${markPath(ox, oy)}"/></svg>
 `;
 }
 

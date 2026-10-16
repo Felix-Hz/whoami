@@ -269,6 +269,64 @@ a {
 }
 
 /* ------------------------------------------------------------------ */
+/* Code blocks: Shiki's css-variables theme, coloured from the tokens */
+/* ------------------------------------------------------------------ */
+
+.code-block {
+  --shiki-foreground: var(--color-ink);
+  --shiki-background: var(--color-tint);
+  --shiki-token-keyword: var(--color-accent);
+  --shiki-token-constant: var(--color-accent);
+  --shiki-token-function: var(--color-ink);
+  --shiki-token-string: var(--color-ink-2);
+  --shiki-token-string-expression: var(--color-ink-2);
+  --shiki-token-comment: var(--color-ink-3);
+  --shiki-token-parameter: var(--color-ink);
+  --shiki-token-punctuation: var(--color-ink-3);
+  --shiki-token-link: var(--color-accent);
+  background: var(--color-tint);
+}
+
+/* ------------------------------------------------------------------ */
+/* Post body on the page grid: text in the text column, code and      */
+/* figures run wider, out toward the right edge                       */
+/* ------------------------------------------------------------------ */
+
+.post-body > * {
+  grid-column: 1 / -1;
+}
+
+.post-body > .code-block {
+  margin-inline: calc(var(--spacing-gutter) * -1);
+}
+
+@media (width >= 48rem) {
+  .post-body > * {
+    grid-column: 3 / -1;
+  }
+
+  .post-body > .code-block {
+    margin-inline: 0;
+  }
+}
+
+@media (width >= 64rem) {
+  .post-body > * {
+    grid-column: 4 / 10;
+  }
+
+  .post-body > .code-block,
+  .post-body > .figure {
+    grid-column: 4 / 12;
+  }
+}
+
+.post-body > .code-block,
+.post-body > .figure {
+  margin-block: 1.6em;
+}
+
+/* ------------------------------------------------------------------ */
 /* Running text in posts                                              */
 /* ------------------------------------------------------------------ */
 
@@ -402,64 +460,6 @@ a {
   width: 0.45rem;
   height: 0.45rem;
   background: var(--color-accent);
-}
-
-/* ------------------------------------------------------------------ */
-/* Code blocks: Shiki's css-variables theme, coloured from the tokens */
-/* ------------------------------------------------------------------ */
-
-.code-block {
-  --shiki-foreground: var(--color-ink);
-  --shiki-background: var(--color-tint);
-  --shiki-token-keyword: var(--color-accent);
-  --shiki-token-constant: var(--color-accent);
-  --shiki-token-function: var(--color-ink);
-  --shiki-token-string: var(--color-ink-2);
-  --shiki-token-string-expression: var(--color-ink-2);
-  --shiki-token-comment: var(--color-ink-3);
-  --shiki-token-parameter: var(--color-ink);
-  --shiki-token-punctuation: var(--color-ink-3);
-  --shiki-token-link: var(--color-accent);
-  background: var(--color-tint);
-}
-
-/* ------------------------------------------------------------------ */
-/* Post body on the page grid: text in the text column, code and      */
-/* figures run wider, out toward the right edge                       */
-/* ------------------------------------------------------------------ */
-
-.post-body > * {
-  grid-column: 1 / -1;
-}
-
-.post-body > .code-block {
-  margin-inline: calc(var(--spacing-gutter) * -1);
-}
-
-@media (width >= 48rem) {
-  .post-body > * {
-    grid-column: 3 / -1;
-  }
-
-  .post-body > .code-block {
-    margin-inline: 0;
-  }
-}
-
-@media (width >= 64rem) {
-  .post-body > * {
-    grid-column: 4 / 10;
-  }
-
-  .post-body > .code-block,
-  .post-body > .figure {
-    grid-column: 4 / 12;
-  }
-}
-
-.post-body > .code-block,
-.post-body > .figure {
-  margin-block: 1.6em;
 }
 
 /* ------------------------------------------------------------------ */
