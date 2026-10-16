@@ -20,7 +20,7 @@ export function Chapter({ id, n, title, note, children }: ChapterProps) {
         <h2 id={`${id}-title`} className="reveal display text-section mb-6 md:mb-7">
           {title}
         </h2>
-        <div className="reveal reveal-late">{children}</div>
+        <div className="reveal-items">{children}</div>
       </div>
     </section>
   );

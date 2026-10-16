@@ -1,3 +1,4 @@
+import { Fragment } from "preact";
 import { authoringSlot } from "@/authoring-slot";
 import type { BlogPost } from "@/types/blog";
 
@@ -23,11 +24,12 @@ export function BlogPostCard({ post, index, thumbs }: { post: BlogPost; index: n
           {post.tags.length > 0 && (
             <span className="block meta mt-2">
               <span className="sr-only">tags: </span>
+              {/* The separator sits outside the no-wrap span, so a long row can still break between tags */}
               {post.tags.map((tag, i) => (
-                <span key={tag} className="whitespace-nowrap">
+                <Fragment key={tag}>
                   {i > 0 && " · "}
-                  {tag}
-                </span>
+                  <span className="whitespace-nowrap">{tag}</span>
+                </Fragment>
               ))}
             </span>
           )}

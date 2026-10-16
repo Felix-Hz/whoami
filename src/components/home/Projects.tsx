@@ -1,3 +1,4 @@
+import { Fragment } from "preact";
 import { getAllProjects } from "@/data/projects";
 import type { Project } from "@/types/project";
 import { Chapter } from "./Chapter";
@@ -10,11 +11,12 @@ function Entry({ project }: { project: Project }) {
       {project.tags.length > 0 && (
         <p className="meta md:text-right">
           <span className="sr-only">tags: </span>
+          {/* The separator sits outside the no-wrap span, so a long row can still break between tags */}
           {project.tags.map((tag, i) => (
-            <span key={tag} className="whitespace-nowrap">
+            <Fragment key={tag}>
               {i > 0 && " · "}
-              {tag}
-            </span>
+              <span className="whitespace-nowrap">{tag}</span>
+            </Fragment>
           ))}
         </p>
       )}

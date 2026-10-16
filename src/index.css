@@ -517,7 +517,12 @@ a {
       animation-range: entry 0% entry 55%;
     }
 
-    .reveal-late {
+    /* Content reveals item by item (a paragraph, an entry, a row), never as one tall block, so nothing
+       you're already reading is still half faded */
+    .reveal-items > :not(ol),
+    .reveal-items li {
+      animation: settle linear both;
+      animation-timeline: view();
       animation-range: entry 10% entry 70%;
     }
 
