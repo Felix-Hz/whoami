@@ -47,7 +47,7 @@ function useDither(hero: { current: HTMLElement | null }, canvas: { current: HTM
           canvas: cv,
           hero: el,
           texts: [el.querySelector<HTMLElement>("[data-thesis]")].filter((x): x is HTMLElement => x !== null),
-          quiet: [...el.querySelectorAll<HTMLElement>("[data-margin] > p"), ...pageType()],
+          quiet: [...el.querySelectorAll<HTMLElement>("#name, [data-margin] > p"), ...pageType()],
           portrait: el.querySelector<HTMLElement>("[data-portrait]"),
           progress: heroProgress,
         });

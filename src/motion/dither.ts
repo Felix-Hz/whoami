@@ -16,7 +16,11 @@ import { frameClock, type Spring, spring, spring0 } from "./spring";
 const MAX_BOXES = 24;
 const SCALE = 1 / 3; // canvas pixels per CSS pixel
 const STEP = 1 / SCALE; // CSS px per canvas pixel: the canvas moves in whole steps of this, so dots never shimmer
-const PAD = 12; // CSS px of air around a line of type; the feather adds three times this
+const PAD = 12; // CSS px of air around a line of type; the feather adds five times this
+// How much of the field each kind of block clears at rest, 0..1. The portrait keeps a fifth of the dither;
+// type keeps 15 points less than that, so it always reads
+const PORTRAIT_CLEAR = 0.8;
+const TEXT_CLEAR = PORTRAIT_CLEAR + 0.15;
 
 const VERT = "attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}";
 const FRAG = `precision highp float;
@@ -44,7 +48,8 @@ void main(){
   for(int i=0;i<${MAX_BOXES};i++){
     vec4 q=L[i];if(q.z<=q.x)continue;vec4 s=P[i];
     vec2 c=(q.xy+q.zw)*.5;vec2 b=(q.zw-q.xy)*.5;
-    float box=1.-smoothstep(0.,pad*3.,sdBox(px,c,b,pad));
+    // A wide feather, so the field thins gradually toward type instead of stopping at an edge
+    float box=1.-smoothstep(-pad*.5,pad*5.,sdBox(px,c,b,pad));
     float reveal=1.-smoothstep(s.z-pad*6.,s.z,length(px-s.xy));
     k=max(k,box*max(reveal,s.w));
   }
@@ -257,13 +262,12 @@ export async function startDither({
   if (!u) return null;
   gl.uniform1f(u.pad, PAD * SCALE);
 
-  const touch = matchMedia("(hover: none)").matches;
   // Hero type first, so it always wins a slot when the page has more type on screen than the GPU has room for
   const blocks: Block[] = [
-    ...texts.map((el) => block(el, touch ? 0.7 : 0, true, true)),
-    ...quiet.map((el) => block(el, 1, false, el.closest("[data-hero]") !== null)),
+    ...texts.map((el) => block(el, TEXT_CLEAR, true, true)),
+    ...quiet.map((el) => block(el, TEXT_CLEAR, false, el.closest("[data-hero]") !== null)),
   ];
-  const portraitBlock = portrait ? block(portrait, 0.8, false, false) : null;
+  const portraitBlock = portrait ? block(portrait, PORTRAIT_CLEAR, false, false) : null;
 
   const pointer: Pointer = { x: -1e4, y: -1e4, inside: false };
   const px = spring0(-1e4);
