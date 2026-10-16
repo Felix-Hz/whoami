@@ -40,9 +40,9 @@ void main(){
   // bottom and top edges
   float hy=(px.y-H.y)/max(1.,H.w-H.y);
   float inHero=step(0.,hy)*step(hy,1.)*smoothstep(0.,.22,hy)*smoothstep(0.,.08,1.-hy);
-  float hero=pow(n0,2.2)*1.1*(1.-smoothstep(.03,.62,x));
+  float hero=pow(n0,2.6)*.72*(1.-smoothstep(.02,.5,x));
   // Every other section: a quieter echo of it, sparser and kept to the left margin
-  float rest=pow(n0,2.6)*.32*(1.-smoothstep(.02,.4,x));
+  float rest=pow(n0,3.)*.2*(1.-smoothstep(.02,.32,x));
   float v=mix(rest*(1.-step(0.,hy)*step(hy,1.)),hero,inHero);
   float k=0.;
   for(int i=0;i<${MAX_BOXES};i++){
