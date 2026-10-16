@@ -40,3 +40,4 @@ studio/dist
 studio/.sanity
 studio/schema.json
 drafts/
+.claude
