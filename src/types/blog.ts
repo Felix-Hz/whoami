@@ -1,13 +1,17 @@
-import type { PortableTextBlock } from "@portabletext/react";
+import type { POSTS_QUERY_RESULT } from "@/generated/sanity.types";
 
-export interface BlogPost {
-  title: string;
-  slug: string;
-  excerpt: string;
-  body: PortableTextBlock[];
+type QueriedPost = POSTS_QUERY_RESULT[number];
+type BodyBlock = NonNullable<QueriedPost["body"]>[number];
+
+// Code blocks carry Shiki's pre-rendered markup, added by scripts/fetch-content.ts
+export type PostBodyBlock = BodyBlock extends infer B
+  ? B extends { _type: "code" }
+    ? B & { html?: string }
+    : B
+  : never;
+
+export type BlogPost = Omit<QueriedPost, "body" | "tags"> & {
+  body: PostBodyBlock[];
   tags: string[];
-  publishedAt: string;
-  coverImage: string | null;
-  coverImageCredit: string | null;
   readingTime: number;
-}
+};

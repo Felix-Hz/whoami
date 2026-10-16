@@ -3,6 +3,9 @@ name: Build & Deploy
 on:
   push:
     branches: [main]
+    # Studio changes deploy through studio-deploy.yml and don't affect the site build
+    paths-ignore:
+      - "studio/**"
   workflow_dispatch:
 
 jobs:

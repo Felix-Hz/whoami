@@ -3,6 +3,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createClient } from "@sanity/client";
 import { createHighlighter } from "shiki";
+import { POSTS_QUERY } from "../src/queries";
 
 const projectId = process.env.SANITY_PROJECT_ID;
 const dataset = process.env.SANITY_DATASET || "production";
@@ -21,28 +22,6 @@ const client = createClient({
   useCdn: false,
   apiVersion: "2025-02-06",
 });
-
-interface SanityPost {
-  title: string;
-  slug: string;
-  excerpt: string;
-  body: unknown[];
-  tags: string[] | null;
-  publishedAt: string;
-  coverImage: string | null;
-  coverImageCredit: string | null;
-}
-
-const QUERY = `*[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && defined(publishedAt) && defined(excerpt)] | order(publishedAt desc) {
-  title,
-  "slug": slug.current,
-  excerpt,
-  body,
-  tags,
-  publishedAt,
-  "coverImage": mainImage.asset->url,
-  coverImageCredit
-}`;
 
 function countWords(blocks: unknown[]): number {
   let count = 0;
@@ -85,7 +64,7 @@ function highlightCode(blocks: unknown[], highlighter: Highlighter): unknown[] {
 async function main() {
   console.log("Fetching blog posts from Sanity...");
 
-  const posts: SanityPost[] = await client.fetch(QUERY);
+  const posts = await client.fetch(POSTS_QUERY);
   const highlighter = await createHighlighter({ themes: Object.values(THEMES), langs: LANGS });
 
   const enriched = posts.map((post) => ({

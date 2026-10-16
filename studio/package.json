@@ -1,8 +1,7 @@
 {
-  "name": "felix-hzvdev",
+  "name": "@whoami/studio",
   "private": true,
   "version": "1.0.0",
-  "main": "package.json",
   "license": "UNLICENSED",
   "scripts": {
     "build": "sanity build",
@@ -16,8 +15,8 @@
   ],
   "dependencies": {
     "@sanity/vision": "^5.31.2",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "sanity": "^5.31.2",
     "styled-components": "^6.1.18"
   },

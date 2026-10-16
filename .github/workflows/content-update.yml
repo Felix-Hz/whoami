@@ -1,6 +1,7 @@
 name: Content Update
 
 on:
+  # Only fires from the Sanity publish webhook, never from pushes, so studio/** changes can't trigger it
   repository_dispatch:
     types: [sanity-content-update]
 

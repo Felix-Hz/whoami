@@ -34,3 +34,9 @@ terraform.tfstate.backup
 *.sw?
 .env
 src/generated/*.json
+# Studio
+studio/.env
+studio/dist
+studio/.sanity
+studio/schema.json
+drafts/
