@@ -17,9 +17,7 @@ export function Footer() {
 
           {/* Right: connect */}
           <div className="flex flex-col gap-4 md:items-end">
-            <h3 className="text-text-inverse/40 uppercase text-xs tracking-[0.15em] font-[var(--font-body)]">
-              connect
-            </h3>
+            <h3 className="text-text-inverse/40 uppercase text-xs tracking-[0.15em] font-body">connect</h3>
             <nav className="flex flex-col gap-2">
               <a
                 href="/blog"

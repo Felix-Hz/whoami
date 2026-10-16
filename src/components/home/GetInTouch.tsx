@@ -7,7 +7,7 @@ export function GetInTouch() {
       <a
         href="mailto:me@felix-hzv.dev"
         onClick={() => trackSocialClick("email")}
-        className="group inline-flex items-baseline flex-wrap font-[var(--font-mono)] text-base md:text-lg text-text-primary py-2 transition-colors duration-normal focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none"
+        className="group inline-flex items-baseline flex-wrap font-mono text-base md:text-lg text-text-primary py-2 transition-colors duration-normal focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none"
       >
         <span className="text-accent font-bold group-hover:text-accent">$</span>
         <span className="ml-1.5 group-hover:text-accent transition-colors duration-normal">mailto</span>

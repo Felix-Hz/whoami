@@ -21,7 +21,7 @@ export function Header() {
       <nav className="flex items-center gap-6">
         <a
           href="/blog"
-          className="text-sm font-[var(--font-mono)] text-text-secondary hover:text-accent transition-colors duration-normal tracking-wide"
+          className="text-sm font-mono text-text-secondary hover:text-accent transition-colors duration-normal tracking-wide"
         >
           blog
         </a>

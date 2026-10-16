@@ -68,15 +68,15 @@ function injectMeta(html: string, meta: { title: string; description: string; ur
 
 // Which markup pulls in each font face (see index.css); a page only preloads the faces it renders
 const FONT_USAGE: Record<string, (body: string) => boolean> = {
-  "supply-sans-ultralight": () => true,
-  "neue-bit-bold": (body) => body.includes("<h1"),
-  "mondwest-regular": (body) => body.includes("<h2"),
-  "whoami-initials": (body) => body.includes("drop-cap") || body.includes("editorial-blockquote"),
+  newsreader: () => true,
+  "newsreader-display": (body) => body.includes("<h1") || body.includes("<h2"),
+  "departure-mono": (body) => body.includes("font-pixel"),
 };
 
 function pruneFontPreloads(html: string, body: string): string {
-  return html.replace(/\s*<link rel="preload" href="\/assets\/([a-z-]+)-[\w-]+\.woff2"[^>]*>/g, (tag, face: string) =>
-    FONT_USAGE[face] && !FONT_USAGE[face](body) ? "" : tag,
+  return html.replace(
+    /\s*<link rel="preload" href="\/assets\/([a-z-]+?)-[\w-]{8}\.woff2"[^>]*>/g,
+    (tag, face: string) => (FONT_USAGE[face] && !FONT_USAGE[face](body) ? "" : tag),
   );
 }
 

@@ -23,10 +23,7 @@ export function BlogListPage(_props: RoutableProps) {
         </header>
 
         {posts.length === 0 ? (
-          <div
-            className="font-[var(--font-mono)] text-sm animate-fade-up flex flex-col gap-1"
-            style={{ animationDelay: "100ms" }}
-          >
+          <div className="font-mono text-sm animate-fade-up flex flex-col gap-1" style={{ animationDelay: "100ms" }}>
             <span>
               <span className="text-accent font-bold">$</span>
               <span className="text-text-secondary ml-1.5">ls ./posts</span>

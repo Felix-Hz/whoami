@@ -21,7 +21,7 @@ export function BlogPostCard({ post, index }: { post: BlogPost; index: number })
             {authoringSlot.Badge && <authoringSlot.Badge post={post} />}
           </div>
 
-          <h2 className="font-[var(--font-heading)] text-xl md:text-2xl text-text-primary group-hover:text-accent transition-colors duration-normal inline-flex items-baseline gap-2">
+          <h2 className="font-heading text-xl md:text-2xl text-text-primary group-hover:text-accent transition-colors duration-normal inline-flex items-baseline gap-2">
             {post.title}
             <span className="text-accent text-sm opacity-0 -translate-x-2 transition-all duration-normal group-hover:opacity-100 group-hover:translate-x-0">
               &rarr;

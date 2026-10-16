@@ -57,7 +57,7 @@ export function Toolbar({ url }: { url: string }) {
   return (
     <aside
       aria-label="Authoring tools (dev only)"
-      className="authoring-toolbar fixed bottom-4 right-4 z-50 flex flex-col gap-2 items-end font-[var(--font-mono)] text-xs bg-surface-elevated text-text-primary border border-border-strong p-2 [&_a]:underline [&_button]:underline [&_button]:cursor-pointer [&_button:disabled]:opacity-50"
+      className="authoring-toolbar fixed bottom-4 right-4 z-50 flex flex-col gap-2 items-end font-mono text-xs bg-surface-elevated text-text-primary border border-border-strong p-2 [&_a]:underline [&_button]:underline [&_button]:cursor-pointer [&_button:disabled]:opacity-50"
     >
       <div className="flex items-center gap-3">
         <button

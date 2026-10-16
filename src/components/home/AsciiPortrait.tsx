@@ -21,16 +21,14 @@ export function AsciiPortrait({ compact = false }: AsciiPortraitProps) {
           <span className={`rounded-full bg-accent/40 ${compact ? "w-1.5 h-1.5" : "w-2.5 h-2.5"}`} />
           <span className={`rounded-full bg-border ${compact ? "w-1.5 h-1.5" : "w-2.5 h-2.5"}`} />
           <span className={`rounded-full bg-border ${compact ? "w-1.5 h-1.5" : "w-2.5 h-2.5"}`} />
-          <span className={`text-text-tertiary font-[var(--font-mono)] ml-2 ${compact ? "text-[10px]" : "text-xs"}`}>
-            whoami
-          </span>
+          <span className={`text-text-tertiary font-mono ml-2 ${compact ? "text-[10px]" : "text-xs"}`}>whoami</span>
         </div>
 
         {/* ASCII face */}
         <div className={`bg-surface-primary flex justify-center ${compact ? "p-2" : "p-3"}`}>
           <pre
             aria-hidden="true"
-            className={`group font-mono overflow-hidden leading-none cursor-default select-none ${
+            className={`group font-pixel overflow-hidden leading-none cursor-default select-none ${
               compact ? "text-[3px] sm:text-[3.5px]" : "text-[4px] md:text-[5px] lg:text-[6px]"
             } ${reducedMotion ? "" : "animate-[breathe_4s_ease-in-out_infinite]"}`}
           >

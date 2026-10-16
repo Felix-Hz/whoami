@@ -34,7 +34,7 @@ export function BlogPostPage({ slug }: BlogPostPageProps) {
         <div className="w-full max-w-3xl mx-auto animate-fade-up">
           <a
             href="/blog"
-            className="group inline-flex items-baseline font-[var(--font-mono)] text-sm text-text-secondary mb-8 transition-colors duration-normal"
+            className="group inline-flex items-baseline font-mono text-sm text-text-secondary mb-8 transition-colors duration-normal"
           >
             <span className="text-accent font-bold">$</span>
             <span className="ml-1.5 group-hover:text-accent transition-colors duration-normal">cd ../blog</span>
@@ -57,7 +57,7 @@ export function BlogPostPage({ slug }: BlogPostPageProps) {
       <article className="w-full max-w-3xl mx-auto">
         <a
           href="/blog"
-          className="group inline-flex items-baseline font-[var(--font-mono)] text-sm text-text-secondary mb-8 animate-fade-up transition-colors duration-normal"
+          className="group inline-flex items-baseline font-mono text-sm text-text-secondary mb-8 animate-fade-up transition-colors duration-normal"
         >
           <span className="text-accent font-bold">$</span>
           <span className="ml-1.5 group-hover:text-accent transition-colors duration-normal">cd ../blog</span>
@@ -68,9 +68,7 @@ export function BlogPostPage({ slug }: BlogPostPageProps) {
 
         <header className="mb-10 animate-fade-up" style={{ animationDelay: "100ms" }}>
           <div className="flex items-center gap-3 text-xs text-text-tertiary tracking-wide mb-3">
-            <span className="font-[var(--font-heading)] text-sm tracking-normal text-text-secondary">
-              felix hernandez vieyra
-            </span>
+            <span className="font-heading text-sm tracking-normal text-text-secondary">felix hernandez vieyra</span>
             <span aria-hidden="true">/</span>
             <time dateTime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
             <span aria-hidden="true">/</span>

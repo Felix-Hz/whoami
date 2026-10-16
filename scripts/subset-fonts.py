@@ -7,16 +7,26 @@ Sources live in fonts/source (never bundled); outputs go to src/assets/fonts.
 """
 
 import re
+from io import BytesIO
 from pathlib import Path
 
 from fontTools import subset
 from fontTools.ttLib import TTFont
+from fontTools.varLib import instancer
 
 ROOT = Path(__file__).resolve().parent.parent
 SOURCE = ROOT / "fonts" / "source"
 OUT = ROOT / "src" / "assets" / "fonts"
 INDEX = ROOT / "index.html"
-ARIAL = Path("/System/Library/Fonts/Supplemental/Arial.ttf")
+SUPPLEMENTAL = Path("/System/Library/Fonts/Supplemental")
+
+# Local faces the metric-matched fallbacks are measured against, and the local() names they load
+FALLBACKS = {
+    "serif": ("Georgia.ttf", ['local("Georgia")', 'local("Times New Roman")']),
+    "serif-bold": ("Georgia Bold.ttf", ['local("Georgia Bold")', 'local("Georgia-Bold")', 'local("Times New Roman Bold")']),
+    "serif-italic": ("Georgia Italic.ttf", ['local("Georgia Italic")', 'local("Georgia-Italic")', 'local("Times New Roman Italic")']),
+    "mono": ("Courier New.ttf", ['local("Courier New")', 'local("Courier")']),
+}
 
 # Basic Latin + Latin-1 (covers Spanish and most Western European accents), punctuation,
 # currency, arrows, and the box-drawing / block / geometric ranges the ASCII art relies on.
@@ -32,16 +42,21 @@ TEXT_UNICODES = [
     0x30C4,  # ツ, for the ¯\_(ツ)_/¯ shrug
 ]
 
-# Drop caps and the blockquote mark only
-INITIAL_UNICODES = [*range(0x41, 0x5B), *range(0x61, 0x7B), *range(0x30, 0x3A), 0x201C, 0x201D, 0x22, 0x27]
+# Departure Mono only sets the wordmark and the ASCII portrait: ASCII, the cursor blocks and the link arrows
+PIXEL_UNICODES = [*range(0x20, 0x7F), 0x2190, 0x2192, 0x2197, 0x2588, 0x258C]
 
 FONTS = [
-    # family, source, output, unicodes, font-display, fallback metrics
-    ("supply-sans-ultralight", "PPSupplySans-Ultralight.otf", "supply-sans-ultralight.woff2", TEXT_UNICODES, "swap", True),
-    ("neue-bit-bold", "PPNeueBit-Bold.otf", "neue-bit-bold.woff2", TEXT_UNICODES, "swap", True),
-    ("mondwest-regular", "PPMondwest-Regular.otf", "mondwest-regular.woff2", TEXT_UNICODES, "swap", True),
-    # Decorative: optional means it never swaps in late, so it can never shift the layout
-    ("whoami-initials", "PirataOne-Regular.ttf", "whoami-initials.woff2", INITIAL_UNICODES, "optional", False),
+    # family, source, output, axis pins, style, weight range it answers to, font-display, fallback, preload
+    # Newsreader ships as static cuts: the full variable font is ~200 KB, each pinned instance ~42 KB.
+    # Text cut (optical size 16) for running copy, display cut (optical size 72) for headlines.
+    ("newsreader", "Newsreader[opsz,wght].ttf", "newsreader.woff2", {"opsz": 16, "wght": 400}, "normal", "300 500", "swap", "serif", True),
+    ("newsreader-display", "Newsreader[opsz,wght].ttf", "newsreader-display.woff2", {"opsz": 72, "wght": 350}, "normal", "300 500", "swap", "serif", True),
+    # Bold and italic only appear inside running text, so they load on demand and are never preloaded
+    ("newsreader", "Newsreader[opsz,wght].ttf", "newsreader-semibold.woff2", {"opsz": 16, "wght": 600}, "normal", "600 700", "swap", "serif-bold", False),
+    ("newsreader", "Newsreader-Italic[opsz,wght].ttf", "newsreader-italic.woff2", {"opsz": 16, "wght": 400}, "italic", "300 500", "swap", "serif-italic", False),
+    # Metadata and code: swaps in behind its metric-matched fallback, so it isn't worth a preload slot
+    ("jetbrains-mono", "JetBrainsMono[wght].ttf", "jetbrains-mono.woff2", {"wght": (400, 500)}, "normal", "400 500", "swap", "mono", False),
+    ("departure-mono", "DepartureMono-Regular.otf", "departure-mono.woff2", None, "normal", "400", "swap", "mono", True),
 ]
 
 # Rough English letter frequencies (space included) for the average-width estimate
@@ -59,35 +74,42 @@ def avg_width(font: TTFont) -> float:
     return total / weight / upm
 
 
-def build(family: str, src: str, out: str, unicodes: list[int]) -> TTFont:
-    font = TTFont(SOURCE / src)
+def build(src: str, out: str, limits: dict | None, unicodes: list[int]) -> TTFont:
+    font = TTFont(SOURCE / src, lazy=False)
+    if limits:
+        font = instancer.instantiateVariableFont(font, limits)
+        # Round-trip so the subsetter sees plain tables (it trips over a partially instanced gvar)
+        buffer = BytesIO()
+        font.save(buffer)
+        buffer.seek(0)
+        font = TTFont(buffer, lazy=False)
     options = subset.Options()
     options.flavor = "woff2"
     options.layout_features = ["kern", "liga"]
-    # Hints are ignored by modern rasterizers and are half the size of the pixel faces
+    # Hints are ignored by modern rasterizers and roughly double the size of the files
     options.hinting = False
     options.name_IDs = ["*"]
     options.notdef_outline = True
     subsetter = subset.Subsetter(options)
     subsetter.populate(unicodes=unicodes)
     subsetter.subset(font)
-    if family == "whoami-initials":
-        # OFL Reserved Font Name: a modified Pirata One must not be called "Pirata"
-        for record in font["name"].names:
-            if record.nameID in (1, 3, 4, 6, 16, 21):
-                record.string = "whoami initials" if record.nameID != 6 else "whoami-initials"
     font.save(OUT / out)
     return font
 
 
-def fallback_rule(family: str, font: TTFont, arial: TTFont) -> str:
+def fallback_rule(family: str, font: TTFont, kind: str, style: str, weight: str) -> str:
+    base_file, sources = FALLBACKS[kind]
+    base = TTFont(SUPPLEMENTAL / base_file)
     upm, hhea = font["head"].unitsPerEm, font["hhea"]
-    adjust = avg_width(font) / avg_width(arial)
+    adjust = avg_width(font) / avg_width(base)
     pct = lambda v: f"{v / upm / adjust * 100:.2f}%"  # noqa: E731
     return (
         "@font-face {\n"
         f'  font-family: "{family}-fallback";\n'
-        '  src: local("Arial"), local("Helvetica Neue"), local("Roboto");\n'
+        f"  src: {', '.join(sources)};\n"
+        # Same style and weight as the face it stands in for, so bold and italic runs get their own metrics
+        f"  font-style: {style};\n"
+        f"  font-weight: {weight};\n"
         f"  size-adjust: {adjust * 100:.2f}%;\n"
         f"  ascent-override: {pct(hhea.ascent)};\n"
         f"  descent-override: {pct(abs(hhea.descent))};\n"
@@ -98,30 +120,42 @@ def fallback_rule(family: str, font: TTFont, arial: TTFont) -> str:
 
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
-    arial = TTFont(ARIAL)
-    rules = []
-    for family, src, out, unicodes, display, fallback in FONTS:
-        font = build(family, src, out, unicodes)
+    for stale in OUT.glob("*.woff2"):
+        stale.unlink()
+    rules, preloads = [], []
+    for family, src, out, limits, style, weight, display, fallback, preload in FONTS:
+        font = build(src, out, limits, PIXEL_UNICODES if family == "departure-mono" else TEXT_UNICODES)
         size = (OUT / out).stat().st_size
         print(f"{out}: {size / 1024:.1f} KB ({len(font.getBestCmap())} glyphs)")
         rules.append(
             "@font-face {\n"
             f'  font-family: "{family}";\n'
             f'  src: url("/src/assets/fonts/{out}") format("woff2");\n'
+            f"  font-style: {style};\n"
+            f"  font-weight: {weight};\n"
             f"  font-display: {display};\n"
             "}"
         )
         if fallback:
-            rules.append(fallback_rule(family, TTFont(SOURCE / src), arial))
+            # Measured on the instance itself, so the display cut gets its own (narrower) metrics
+            rules.append(fallback_rule(family, font, fallback, style, weight))
+        if preload:
+            preloads.append(f'<link rel="preload" href="/src/assets/fonts/{out}" as="font" type="font/woff2" crossorigin />')
 
+    indent = "\n        "
     style = "\n".join(rules).replace("\n", "\n            ")
-    block = f"<!-- fonts:start (generated by scripts/subset-fonts.py) -->\n        <style>\n            {style}\n        </style>\n        <!-- fonts:end -->"
+    block = (
+        "<!-- fonts:start (generated by scripts/subset-fonts.py) -->"
+        + indent
+        + indent.join(preloads)
+        + f"{indent}<style>\n            {style}\n        </style>{indent}<!-- fonts:end -->"
+    )
     html = INDEX.read_text()
     html, count = re.subn(r"<!-- fonts:start.*?<!-- fonts:end -->", block, html, flags=re.S)
     if count != 1:
         raise SystemExit("index.html needs one <!-- fonts:start --> ... <!-- fonts:end --> block")
     INDEX.write_text(html)
-    print("Updated the @font-face block in index.html")
+    print("Updated the preloads and @font-face block in index.html")
 
 
 if __name__ == "__main__":

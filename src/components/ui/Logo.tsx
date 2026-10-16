@@ -1,6 +1,6 @@
 export function Logo({ className }: { className?: string }) {
   return (
-    <a href="/" className={`group inline-flex items-baseline font-[var(--font-mono)] text-xl ${className ?? ""}`}>
+    <a href="/" className={`group inline-flex items-baseline font-pixel text-xl ${className ?? ""}`}>
       <span className="text-accent font-bold">$</span>
       <span className="ml-1.5 tracking-tight">
         {"whoami".split("").map((char, i) => (

@@ -21,11 +21,12 @@
   --color-border: #e5e5e5;
   --color-border-strong: #0a0a0a;
 
-  /* Each face falls back to a metric-matched Arial first (see index.html), so the swap doesn't shift layout */
-  --font-display: "neue-bit-bold", "neue-bit-bold-fallback", system-ui, sans-serif;
-  --font-heading: "mondwest-regular", "mondwest-regular-fallback", system-ui, sans-serif;
-  --font-body: "supply-sans-ultralight", "supply-sans-ultralight-fallback", system-ui, sans-serif;
-  --font-mono: "SF Mono", "Fira Code", ui-monospace, monospace;
+  /* Each face falls back to a metric-matched local face first (see index.html), so the swap doesn't shift layout */
+  --font-display: "newsreader-display", "newsreader-display-fallback", Georgia, serif;
+  --font-heading: "newsreader-display", "newsreader-display-fallback", Georgia, serif;
+  --font-body: "newsreader", "newsreader-fallback", Georgia, serif;
+  --font-mono: "jetbrains-mono", "jetbrains-mono-fallback", ui-monospace, monospace;
+  --font-pixel: "departure-mono", "departure-mono-fallback", ui-monospace, monospace;
 
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --duration-fast: 150ms;
@@ -131,7 +132,7 @@ h1 {
 }
 
 .drop-cap::first-letter {
-  font-family: "whoami-initials", Georgia, serif;
+  font-family: var(--font-display);
   float: left;
   font-size: 3.8em;
   line-height: 0.75;
@@ -194,7 +195,7 @@ h1 {
 
 .editorial-blockquote::before {
   content: "\201C";
-  font-family: "whoami-initials", Georgia, serif;
+  font-family: var(--font-display);
   font-size: 4rem;
   line-height: 1;
   color: var(--color-accent);

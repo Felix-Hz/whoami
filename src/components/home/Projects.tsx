@@ -5,7 +5,7 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
   return (
     <div className="py-4 first:pt-0 animate-fade-up" style={{ animationDelay: `${600 + index * 100}ms` }}>
       <div className="flex flex-col gap-2">
-        <h3 className="font-[var(--font-heading)] text-lg md:text-xl text-text-primary">{project.name}</h3>
+        <h3 className="font-heading text-lg md:text-xl text-text-primary">{project.name}</h3>
 
         <p className="text-text-secondary text-sm md:text-base leading-relaxed">{project.description}</p>
 
@@ -14,7 +14,7 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
             href={project.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="group inline-flex items-baseline font-[var(--font-mono)] text-sm text-text-primary transition-colors duration-normal focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none"
+            className="group inline-flex items-baseline font-mono text-sm text-text-primary transition-colors duration-normal focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none"
           >
             <span className="text-accent font-bold">$</span>
             <span className="ml-1.5 group-hover:text-accent transition-colors duration-normal">open</span>
@@ -32,7 +32,7 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
             href={project.repo}
             target="_blank"
             rel="noopener noreferrer"
-            className="group inline-flex items-baseline font-[var(--font-mono)] text-sm text-text-primary transition-colors duration-normal focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none"
+            className="group inline-flex items-baseline font-mono text-sm text-text-primary transition-colors duration-normal focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none"
           >
             <span className="text-accent font-bold">$</span>
             <span className="ml-1.5 group-hover:text-accent transition-colors duration-normal">git clone</span>

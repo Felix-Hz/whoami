@@ -14,15 +14,13 @@ export function createPortableTextComponents(body: PostBodyBlock[]): PortableTex
             <span>&bull;</span>
             <span>&bull;</span>
           </div>
-          <h2 className="font-[var(--font-heading)] text-2xl md:text-3xl text-text-primary mb-4">{children}</h2>
+          <h2 className="font-heading text-2xl md:text-3xl text-text-primary mb-4">{children}</h2>
         </>
       ),
       h3: ({ children }) => (
-        <h3 className="font-[var(--font-heading)] text-xl md:text-2xl text-text-primary mt-8 mb-3">{children}</h3>
+        <h3 className="font-heading text-xl md:text-2xl text-text-primary mt-8 mb-3">{children}</h3>
       ),
-      h4: ({ children }) => (
-        <h4 className="font-[var(--font-heading)] text-lg md:text-xl text-text-primary mt-6 mb-2">{children}</h4>
-      ),
+      h4: ({ children }) => <h4 className="font-heading text-lg md:text-xl text-text-primary mt-6 mb-2">{children}</h4>,
       normal: ({ children, value }) => {
         if (value._key === firstParagraphKey) {
           return <p className="drop-cap text-text-secondary leading-relaxed mb-5">{children}</p>;
@@ -35,7 +33,7 @@ export function createPortableTextComponents(body: PostBodyBlock[]): PortableTex
       strong: ({ children }) => <strong className="text-text-primary font-semibold">{children}</strong>,
       em: ({ children }) => <em>{children}</em>,
       code: ({ children }) => (
-        <code className="font-[var(--font-mono)] text-sm bg-surface-inverse/5 text-text-primary px-1.5 py-0.5 rounded">
+        <code className="font-mono text-sm bg-surface-inverse/5 text-text-primary px-1.5 py-0.5 rounded">
           {children}
         </code>
       ),
@@ -70,16 +68,16 @@ export function createPortableTextComponents(body: PostBodyBlock[]): PortableTex
         <div className="my-6">
           {value.language && (
             <div className="bg-surface-inverse text-text-inverse/50 px-5 pt-3 pb-0 rounded-t-sm">
-              <span className="font-[var(--font-mono)] text-xs uppercase tracking-wider">{value.language}</span>
+              <span className="font-mono text-xs uppercase tracking-wider">{value.language}</span>
             </div>
           )}
           <pre
             className={`bg-surface-inverse text-text-inverse p-5 ${value.language ? "rounded-b-sm" : "rounded-sm"} overflow-x-auto text-sm leading-relaxed`}
           >
             {value.html ? (
-              <code className="shiki-code font-[var(--font-mono)]" dangerouslySetInnerHTML={{ __html: value.html }} />
+              <code className="shiki-code font-mono" dangerouslySetInnerHTML={{ __html: value.html }} />
             ) : (
-              <code className="font-[var(--font-mono)]">{value.code}</code>
+              <code className="font-mono">{value.code}</code>
             )}
           </pre>
         </div>
