@@ -2,21 +2,26 @@ import { frameClock, type Spring, spring, spring0 } from "./spring";
 
 /**
  * The home page's one background: a 1-bit ordered dither of slow noise, printed in the accent ink at a
- * third of the CSS resolution and scaled up pixelated, like a risograph. Its jobs:
- *  - give the hero a printed texture, densest on the left;
- *  - get out of the way of type: pointing at a line clears the dither behind it, opening from the pointer;
- *  - answer the pointer: a small lens that prints the field's negative wherever it passes;
+ * third of the CSS resolution and scaled up pixelated, like a risograph. One fixed canvas behind the
+ * whole page; the pattern is anchored to the page, so it scrolls with the content. Its jobs:
+ *  - give the hero a printed texture, densest on the left, and every other section a faint one;
+ *  - get out of the way of type: small type always keeps a soft clearing, and pointing at the hero's
+ *    thesis clears the dither behind it, opening from the pointer (the name answers with its own halo, in CSS);
+ *  - answer the pointer everywhere: a small lens that prints the field's negative wherever it passes;
  *  - hand the portrait back to the ink as the hero scrolls away (see heroProgress).
- * Raw WebGL on one fullscreen triangle, no library. Pauses offscreen and in background tabs.
+ * Raw WebGL on one fullscreen triangle, no library. Pauses in background tabs, drops to 30 fps when idle.
  */
 
-const MAX_BOXES = 18; // margin + name + thesis lines on a phone, plus the portrait; 36 uniform vectors fits every GPU we target
+// Boxes uploaded per frame: only those on screen. 48 uniform vectors plus a handful fits mobile GPUs (64)
+const MAX_BOXES = 24;
 const SCALE = 1 / 3; // canvas pixels per CSS pixel
+const STEP = 1 / SCALE; // CSS px per canvas pixel: the canvas moves in whole steps of this, so dots never shimmer
 const PAD = 12; // CSS px of air around a line of type; the feather adds three times this
 
 const VERT = "attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}";
 const FRAG = `precision highp float;
 uniform vec2 r;uniform float t;uniform vec2 m;uniform float mi;uniform vec3 ink;uniform vec3 paper;
+uniform float scroll;uniform vec4 H;
 uniform vec4 L[${MAX_BOXES}];uniform vec4 P[${MAX_BOXES}];uniform float pad;
 float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1.,0.)),f.x),mix(h(i+vec2(0.,1.)),h(i+vec2(1.,1.)),f.x),f.y);}
@@ -25,12 +30,20 @@ float b4(vec2 a){return b2(.5*a)*.25+b2(a);}
 float b8(vec2 a){return b4(.5*a)*.25+b2(a);}
 float sdBox(vec2 p,vec2 c,vec2 b,float k){vec2 q=abs(p-c)-b+k;return length(max(q,0.))+min(max(q.x,q.y),0.)-k;}
 void main(){
-  vec2 px=gl_FragCoord.xy;vec2 uv=px/r.y;
-  float v=.6*n(uv*2.6+vec2(0.,t*.035))+.4*n(uv*6.-vec2(t*.03,0.));
-  // Densest at the left edge, fading out before the portrait on the right
-  v=pow(v,2.2)*1.1*(1.-smoothstep(.03,.62,px.x/r.x));
-  // Fade out toward the hero's top and bottom so the field has no hard edge
-  v*=smoothstep(0.,.22,px.y/r.y)*smoothstep(0.,.08,1.-px.y/r.y);
+  vec2 px=gl_FragCoord.xy;
+  // Page space: y grows downward from the top of the document, so noise and dots travel with the content
+  vec2 pg=vec2(px.x,r.y-px.y+scroll);
+  vec2 uv=pg/r.x*1.6;
+  float n0=.6*n(uv*2.6+vec2(0.,t*.035))+.4*n(uv*6.-vec2(t*.03,0.));
+  float x=px.x/r.x;
+  // The hero, as designed: densest at the left edge, fading before the portrait, and out toward its
+  // bottom and top edges
+  float hy=(px.y-H.y)/max(1.,H.w-H.y);
+  float inHero=step(0.,hy)*step(hy,1.)*smoothstep(0.,.22,hy)*smoothstep(0.,.08,1.-hy);
+  float hero=pow(n0,2.2)*1.1*(1.-smoothstep(.03,.62,x));
+  // Every other section: a quieter echo of it, sparser and kept to the left margin
+  float rest=pow(n0,2.6)*.32*(1.-smoothstep(.02,.4,x));
+  float v=mix(rest*(1.-step(0.,hy)*step(hy,1.)),hero,inHero);
   float k=0.;
   for(int i=0;i<${MAX_BOXES};i++){
     vec4 q=L[i];if(q.z<=q.x)continue;vec4 s=P[i];
@@ -40,13 +53,13 @@ void main(){
     k=max(k,box*max(reveal,s.w));
   }
   v*=1.-k;
-  float field=step(b8(px)+.02,v*.85);
+  float field=step(b8(pg)+.02,v*.85);
   // The pointer lens is its own dithered bitmap, XOR'd with the field: where it meets the field it prints
   // the negative (dots become gaps, gaps become dots); over empty paper it's a light lens of its own.
-  // It steps aside wherever type is opening.
-  float d=length(px-m)/r.y;
-  float l=mi*exp(-d*d*64.)*(1.-k)*(.38+.62*smoothstep(.02,.2,v));
-  float lens=step(b8(px+vec2(3.,5.))+.02,l*.95);
+  // It steps aside wherever type is clear.
+  float d=length(px-m)/r.x*1.6;
+  float l=mi*exp(-d*d*64.)*(1.-k)*(.38+.62*smoothstep(.02,.2,v))*mix(.6,1.,inHero);
+  float lens=step(b8(pg+vec2(3.,5.))+.02,l*.95);
   gl_FragColor=vec4(mix(paper,ink,abs(field-lens)),1.);
 }`;
 
@@ -59,11 +72,16 @@ interface Box {
 
 interface Block {
   el: HTMLElement;
+  // Page coordinates (CSS px from the document's top-left)
   lines: Box[];
   union: Box | null;
   open: boolean;
-  // Resting clearance behind the block, 0..1: touch screens can't hover, so their type always gets some
+  // Resting clearance behind the block, 0..1: 1 for small type, which must always read
   base: number;
+  // Whether pointing at it opens a clearing (the hero's name and thesis)
+  opens: boolean;
+  // Per line, or one box for the whole element
+  perLine: boolean;
   rd: Spring;
   ox: number;
   oy: number;
@@ -72,9 +90,9 @@ interface Block {
 export interface DitherOptions {
   canvas: HTMLCanvasElement;
   hero: HTMLElement;
-  // Blocks of type that knock the field out when pointed at
+  // Hero type that knocks the field out when pointed at
   texts: HTMLElement[];
-  // Small type that the field always stays clear of, pointer or not (the hero's margin notes)
+  // Type that the field always stays clear of, pointer or not
   quiet?: HTMLElement[];
   // Kept thin behind the portrait until the hero scrolls away
   portrait?: HTMLElement | null;
@@ -94,28 +112,31 @@ function parseColor(value: string): [number, number, number] {
   return nums.map((x) => x / 255) as [number, number, number];
 }
 
-// Line boxes of a block, relative to `origin`, merged per visual line
-function lineBoxes(el: HTMLElement, origin: DOMRect): Box[] {
+const toPage = (q: DOMRect): Box => ({
+  x0: q.left + window.scrollX,
+  y0: q.top + window.scrollY,
+  x1: q.right + window.scrollX,
+  y1: q.bottom + window.scrollY,
+});
+
+// Line boxes of a block in page coordinates, merged per visual line
+function lineBoxes(el: HTMLElement): Box[] {
   const range = document.createRange();
   range.selectNodeContents(el);
   const rows: (Box & { cy: number })[] = [];
   for (const q of range.getClientRects()) {
     if (q.width < 1 || q.height < 1) continue;
-    const cy = (q.top + q.bottom) / 2;
+    const b = toPage(q);
+    const cy = (b.y0 + b.y1) / 2;
     const row = rows.find((r) => Math.abs(r.cy - cy) < q.height * 0.4);
     if (row) {
-      row.x0 = Math.min(row.x0, q.left);
-      row.x1 = Math.max(row.x1, q.right);
-      row.y0 = Math.min(row.y0, q.top);
-      row.y1 = Math.max(row.y1, q.bottom);
-    } else rows.push({ x0: q.left, x1: q.right, y0: q.top, y1: q.bottom, cy });
+      row.x0 = Math.min(row.x0, b.x0);
+      row.x1 = Math.max(row.x1, b.x1);
+      row.y0 = Math.min(row.y0, b.y0);
+      row.y1 = Math.max(row.y1, b.y1);
+    } else rows.push({ ...b, cy });
   }
-  return rows.map((r) => ({
-    x0: r.x0 - origin.left,
-    x1: r.x1 - origin.left,
-    y0: r.y0 - origin.top,
-    y1: r.y1 - origin.top,
-  }));
+  return rows.map(({ x0, y0, x1, y1 }) => ({ x0, y0, x1, y1 }));
 }
 
 function unionOf(boxes: Box[]): Box | null {
@@ -142,9 +163,16 @@ function reachOf(b: Block, u: Box) {
   return Math.max(...corners.map(([x, y]) => Math.hypot(x - b.ox, y - b.oy))) + PAD * 4;
 }
 
-function stepBlock(b: Block, pointer: { x: number; y: number; inside: boolean }, dt: number) {
+// Pointer in page coordinates
+interface Pointer {
+  x: number;
+  y: number;
+  inside: boolean;
+}
+
+function stepBlock(b: Block, pointer: Pointer, dt: number) {
   const u = b.union;
-  if (!u) return;
+  if (!u || !b.opens) return;
   const { x, y, inside } = pointer;
   // Opening needs the pointer on a line; staying open only needs it near the block, so moving between lines never flickers
   const wants = inside && (b.open ? near(u, x, y, PAD * 2) : b.lines.some((l) => near(l, x, y, PAD * 0.5)));
@@ -194,8 +222,29 @@ async function compile(gl: WebGLRenderingContext) {
   gl.enableVertexAttribArray(attr);
   gl.vertexAttribPointer(attr, 2, gl.FLOAT, false, 0, 0);
   return Object.fromEntries(
-    ["r", "t", "m", "mi", "ink", "paper", "L", "P", "pad"].map((k) => [k, gl.getUniformLocation(program, k)]),
+    ["r", "t", "m", "mi", "ink", "paper", "scroll", "H", "L", "P", "pad"].map((k) => [
+      k,
+      gl.getUniformLocation(program, k),
+    ]),
   );
+}
+
+const block = (el: HTMLElement, base: number, opens: boolean, perLine: boolean): Block => ({
+  el,
+  lines: [],
+  union: null,
+  open: false,
+  base,
+  opens,
+  perLine,
+  rd: spring0(),
+  ox: 0,
+  oy: 0,
+});
+
+function measureBlock(b: Block) {
+  b.lines = b.perLine ? lineBoxes(b.el) : [toPage(b.el.getBoundingClientRect())];
+  b.union = unionOf(b.lines);
 }
 
 export async function startDither({
@@ -213,32 +262,25 @@ export async function startDither({
   gl.uniform1f(u.pad, PAD * SCALE);
 
   const touch = matchMedia("(hover: none)").matches;
-  const block = (el: HTMLElement, base: number): Block => ({
-    el,
-    lines: [],
-    union: null,
-    open: false,
-    base,
-    rd: spring0(),
-    ox: 0,
-    oy: 0,
-  });
-  const blocks: Block[] = [...quiet.map((el) => block(el, 1)), ...texts.map((el) => block(el, touch ? 0.7 : 0))];
-  const portraitBlock: Block | null = portrait
-    ? { el: portrait, lines: [], union: null, open: false, base: 0.8, rd: spring0(), ox: 0, oy: 0 }
-    : null;
+  // Hero type first, so it always wins a slot when the page has more type on screen than the GPU has room for
+  const blocks: Block[] = [
+    ...texts.map((el) => block(el, touch ? 0.7 : 0, true, true)),
+    ...quiet.map((el) => block(el, 1, false, el.closest("[data-hero]") !== null)),
+  ];
+  const portraitBlock = portrait ? block(portrait, 0.8, false, false) : null;
 
-  const pointer = { x: -1e4, y: -1e4, inside: false };
+  const pointer: Pointer = { x: -1e4, y: -1e4, inside: false };
   const px = spring0(-1e4);
   const py = spring0(-1e4);
   const lens = spring0();
   const L = new Float32Array(MAX_BOXES * 4);
   const P = new Float32Array(MAX_BOXES * 4);
   const clock = frameClock();
-  let width = 0;
-  let height = 0;
-  let visible = false;
+  let cssHeight = 0;
+  let heroBox: Box = { x0: 0, y0: 0, x1: 0, y1: 0 };
   let raf = 0;
+  let lastFrame = 0;
+  let lastActive = 0;
 
   const readColors = () => {
     const cs = getComputedStyle(hero);
@@ -248,47 +290,53 @@ export async function startDither({
 
   // Layout is read here only: on resize, font load and theme change, never per frame
   const measure = () => {
-    const origin = canvas.getBoundingClientRect();
-    width = origin.width;
-    height = origin.height;
-    const w = Math.max(1, Math.round(width * SCALE));
-    const h = Math.max(1, Math.round(height * SCALE));
+    const w = Math.max(1, Math.round(canvas.clientWidth * SCALE));
+    const h = Math.max(1, Math.round(canvas.clientHeight * SCALE));
+    cssHeight = h / SCALE;
     if (canvas.width !== w || canvas.height !== h) {
       canvas.width = w;
       canvas.height = h;
       gl.viewport(0, 0, w, h);
     }
-    for (const b of blocks) {
-      b.lines = lineBoxes(b.el, origin);
-      b.union = unionOf(b.lines);
-    }
-    if (portraitBlock) {
-      const q = portraitBlock.el.getBoundingClientRect();
-      portraitBlock.lines = [
-        { x0: q.left - origin.left, y0: q.top - origin.top, x1: q.right - origin.left, y1: q.bottom - origin.top },
-      ];
-      portraitBlock.union = portraitBlock.lines[0];
-    }
+    for (const b of blocks) measureBlock(b);
+    if (portraitBlock) measureBlock(portraitBlock);
+    heroBox = toPage(hero.getBoundingClientRect());
   };
 
   const step = (dt: number) => {
     spring(px, pointer.x, 18, dt);
     spring(py, pointer.y, 18, dt);
     for (const b of blocks) stepBlock(b, pointer, dt);
-    // The lens is for empty paper; while you're reading it steps aside instead of crowding the line
+    // The lens is for open paper; while you're reading the hero it steps aside instead of crowding the line
     const reading = blocks.some((b) => b.open);
     spring(lens, pointer.inside && !reading ? 1 : 0, reading ? 10 : 6, dt);
   };
 
-  const upload = () => {
+  // The canvas sits at the last whole canvas pixel above the scroll position, nudged up by the remainder
+  // with a compositor-only transform; every dot stays put on the page while the content scrolls
+  const place = () => {
+    const top = Math.floor(window.scrollY / STEP) * STEP;
+    canvas.style.transform = `translate3d(0,${top - window.scrollY}px,0)`;
+    return top;
+  };
+
+  const upload = (top: number) => {
     L.fill(0);
     P.fill(0);
+    const bottom = top + cssHeight;
+    const toCanvas = (b: Box) => [
+      b.x0 * SCALE,
+      (cssHeight - (b.y1 - top)) * SCALE,
+      b.x1 * SCALE,
+      (cssHeight - (b.y0 - top)) * SCALE,
+    ];
     let i = 0;
     const put = (b: Block, base: number) => {
       for (const l of b.lines) {
         if (i >= MAX_BOXES) return;
-        L.set([l.x0 * SCALE, (height - l.y1) * SCALE, l.x1 * SCALE, (height - l.y0) * SCALE], i * 4);
-        P.set([b.ox * SCALE, (height - b.oy) * SCALE, b.rd.x * SCALE, base], i * 4);
+        if (l.y1 + PAD * 4 < top || l.y0 - PAD * 4 > bottom) continue;
+        L.set(toCanvas(l), i * 4);
+        P.set([b.ox * SCALE, (cssHeight - (b.oy - top)) * SCALE, b.rd.x * SCALE, base], i * 4);
         i++;
       }
     };
@@ -297,42 +345,72 @@ export async function startDither({
     if (portraitBlock) put(portraitBlock, portraitBlock.base * (1 - progress()));
     gl.uniform4fv(u.L, L);
     gl.uniform4fv(u.P, P);
+    gl.uniform4f(
+      u.H,
+      0,
+      (cssHeight - (heroBox.y1 - top)) * SCALE,
+      canvas.width,
+      (cssHeight - (heroBox.y0 - top)) * SCALE,
+    );
   };
 
   const draw = (now: number) => {
     step(clock.tick(now));
-    upload();
+    const top = place();
+    upload(top);
     gl.uniform2f(u.r, canvas.width, canvas.height);
     gl.uniform1f(u.t, now / 1000);
-    gl.uniform2f(u.m, px.x * SCALE, (height - py.x) * SCALE);
+    gl.uniform1f(u.scroll, top * SCALE);
+    gl.uniform2f(u.m, px.x * SCALE, (cssHeight - (py.x - top)) * SCALE);
     gl.uniform1f(u.mi, lens.x);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   };
 
+  // Full rate while something is moving (pointer, scroll, springs); 30 fps when the page is just sitting there
+  const busy = () =>
+    lens.x > 0.001 ||
+    Math.abs(lens.v) > 0.001 ||
+    blocks.some((b) => b.open || b.rd.x > 0) ||
+    performance.now() - lastActive < 600;
+
   const loop = (now: number) => {
-    if (!visible || document.hidden) {
+    if (document.hidden) {
       raf = 0;
       return;
     }
-    draw(now);
+    if (busy() || now - lastFrame > 32) {
+      lastFrame = now;
+      draw(now);
+    }
     raf = requestAnimationFrame(loop);
   };
   const resume = () => {
-    if (raf || !visible || document.hidden) return;
+    if (raf || document.hidden) return;
     clock.reset();
     raf = requestAnimationFrame(loop);
   };
 
   const onMove = (e: PointerEvent) => {
     if (e.pointerType === "touch") return;
-    const q = canvas.getBoundingClientRect();
-    const x = e.clientX - q.left;
-    const y = e.clientY - q.top;
+    const x = e.clientX + window.scrollX;
+    const y = e.clientY + window.scrollY;
     if (!pointer.inside) {
       px.x = x;
       py.x = y;
     }
     Object.assign(pointer, { x, y, inside: true });
+    lastActive = performance.now();
+  };
+  // Scrolling moves the page under a still pointer; keep it pinned to the same spot on screen
+  let lastScroll = window.scrollY;
+  const onScroll = () => {
+    const dy = window.scrollY - lastScroll;
+    lastScroll = window.scrollY;
+    if (pointer.inside) {
+      pointer.y += dy;
+      py.x += dy;
+    }
+    lastActive = performance.now();
   };
   const onLeave = () => {
     pointer.inside = false;
@@ -340,7 +418,7 @@ export async function startDither({
   const onVisibility = () => resume();
   const onScheme = () => {
     readColors();
-    if (!raf) draw(performance.now());
+    draw(performance.now());
   };
   const onLost = (e: Event) => {
     e.preventDefault();
@@ -351,26 +429,23 @@ export async function startDither({
 
   const resizer = new ResizeObserver(() => {
     measure();
-    if (!raf) draw(performance.now());
+    draw(performance.now());
   });
   resizer.observe(canvas);
-  const seen = new IntersectionObserver(([entry]) => {
-    visible = entry.isIntersecting;
-    resume();
-  });
-  seen.observe(canvas);
+  resizer.observe(document.body);
   const scheme = matchMedia("(prefers-color-scheme: dark)");
   const themeAttr = new MutationObserver(onScheme);
   themeAttr.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
-  hero.addEventListener("pointermove", onMove, { passive: true });
-  hero.addEventListener("pointerleave", onLeave);
+  window.addEventListener("pointermove", onMove, { passive: true });
+  window.addEventListener("scroll", onScroll, { passive: true });
+  document.documentElement.addEventListener("pointerleave", onLeave);
   document.addEventListener("visibilitychange", onVisibility);
   scheme.addEventListener("change", onScheme);
   canvas.addEventListener("webglcontextlost", onLost);
   document.fonts?.ready.then(() => {
     measure();
-    if (!raf) draw(performance.now());
+    draw(performance.now());
   });
 
   readColors();
@@ -385,14 +460,15 @@ export async function startDither({
   return () => {
     cancelAnimationFrame(raf);
     resizer.disconnect();
-    seen.disconnect();
     themeAttr.disconnect();
-    hero.removeEventListener("pointermove", onMove);
-    hero.removeEventListener("pointerleave", onLeave);
+    window.removeEventListener("pointermove", onMove);
+    window.removeEventListener("scroll", onScroll);
+    document.documentElement.removeEventListener("pointerleave", onLeave);
     document.removeEventListener("visibilitychange", onVisibility);
     scheme.removeEventListener("change", onScheme);
     canvas.removeEventListener("webglcontextlost", onLost);
     gl.getExtension("WEBGL_lose_context")?.loseContext();
+    canvas.style.transform = "";
     delete hero.dataset.dither;
   };
 }

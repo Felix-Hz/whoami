@@ -563,3 +563,37 @@ a {
 .hero-poster[data-dither="on"]::before {
   display: none;
 }
+
+/* The name answers the pointer with its own contrast: a soft paper halo that hugs each letterform and
+   lifts it off the dither, instead of clearing a box behind it. Touch screens keep a lighter one at rest. */
+.name-halo {
+  --halo:
+    0 0 0.02em var(--color-paper), 0 0 0.05em var(--color-paper), 0 0 0.1em var(--color-paper),
+    0 0 0.18em var(--color-paper);
+  text-shadow:
+    0 0 0 transparent,
+    0 0 0 transparent,
+    0 0 0 transparent,
+    0 0 0 transparent;
+  transition: text-shadow 450ms var(--ease-out);
+}
+
+@media (hover: hover) {
+  .name-halo:hover {
+    text-shadow: var(--halo);
+  }
+}
+
+@media (hover: none) {
+  .name-halo {
+    text-shadow:
+      0 0 0.02em var(--color-paper),
+      0 0 0.06em var(--color-paper);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .name-halo {
+    transition: none;
+  }
+}

@@ -17,6 +17,16 @@ interface NetworkInformation {
   saveData?: boolean;
 }
 
+// Every piece of type outside the hero that the faint field must stay clear of. Outermost matches only,
+// so a list row counts once rather than once per span inside it.
+const PAGE_TYPE =
+  "header a, header summary, main section:not([data-hero]) :is(h2, p, li, article, .font-pixel, a), footer :is(p, a)";
+
+function pageType(): HTMLElement[] {
+  const found = [...document.querySelectorAll<HTMLElement>(PAGE_TYPE)];
+  return found.filter((el) => !found.some((other) => other !== el && other.contains(el)));
+}
+
 // The shader is code-split and only fetched once the page is idle, after first paint. Reduced motion,
 // Save-Data and no WebGL all keep the static dotted poster instead.
 function useDither(hero: { current: HTMLElement | null }, canvas: { current: HTMLCanvasElement | null }) {
@@ -36,10 +46,8 @@ function useDither(hero: { current: HTMLElement | null }, canvas: { current: HTM
         stop = await startDither({
           canvas: cv,
           hero: el,
-          texts: [el.querySelector("h1"), el.querySelector("[data-thesis]")].filter(
-            (x): x is HTMLElement => x !== null,
-          ),
-          quiet: [...el.querySelectorAll<HTMLElement>("[data-margin] > p")],
+          texts: [el.querySelector<HTMLElement>("[data-thesis]")].filter((x): x is HTMLElement => x !== null),
+          quiet: [...el.querySelectorAll<HTMLElement>("[data-margin] > p"), ...pageType()],
           portrait: el.querySelector<HTMLElement>("[data-portrait]"),
           progress: heroProgress,
         });
@@ -72,7 +80,13 @@ export function HeroSection(_props: RoutableProps) {
         className="hero-poster relative pt-6 pb-14 md:pt-16 md:pb-24 lg:pt-20 lg:pb-28"
         data-hero
       >
-        <canvas ref={canvas} aria-hidden="true" tabIndex={-1} className="absolute inset-0 w-full h-full" />
+        {/* One field behind the whole page; 3px taller than the viewport so it can step with the scroll */}
+        <canvas
+          ref={canvas}
+          aria-hidden="true"
+          tabIndex={-1}
+          className="fixed left-0 top-0 w-full h-[calc(100lvh+3px)] -z-10 pointer-events-none"
+        />
         <div className="page-grid relative z-10">
           <div data-margin className="col-margin meta order-3 md:order-none mt-8 md:mt-0 md:pt-[1.6vw]">
             <p className="text-accent">software engineer</p>
@@ -91,7 +105,7 @@ export function HeroSection(_props: RoutableProps) {
           <h1
             id="name"
             aria-label={NAME.join(" ")}
-            className="intro display text-display col-span-full md:col-start-3 md:col-span-6 lg:col-start-4 lg:col-span-9"
+            className="intro name-halo display text-display col-span-full md:col-start-3 md:col-span-6 lg:col-start-4 lg:col-span-9"
           >
             {NAME.map((word, i) => (
               <Fragment key={word}>
