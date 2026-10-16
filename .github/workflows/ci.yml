@@ -33,6 +33,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # src/generated/posts.json is gitignored and written by the content fetch; the type check imports it
+      - name: Fetch content
+        env:
+          SANITY_PROJECT_ID: ${{ secrets.SANITY_PROJECT_ID || '4qw0kd9q' }}
+          SANITY_DATASET: ${{ secrets.SANITY_DATASET || 'production' }}
+        run: pnpm prebuild
+
       - name: Sanity typegen drift check
         run: |
           pnpm typegen
