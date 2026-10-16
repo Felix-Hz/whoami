@@ -5,6 +5,13 @@ on: pull_request
 permissions:
   contents: write
   pull-requests: write
+  actions: write
+  checks: read
+
+# A Dependabot rebase pushes a new commit; only the newest one is worth waiting on
+concurrency:
+  group: automerge-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 jobs:
   automerge:
@@ -12,18 +19,46 @@ jobs:
     # Not github.actor: a "@dependabot rebase" comment makes the commenter the actor.
     if: github.event.pull_request.user.login == 'dependabot[bot]'
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - id: meta
         uses: dependabot/fetch-metadata@v3
 
-      # Every update type, majors included: --auto only merges once main's required check (ci-ok)
-      # passes, so a breaking bump stays open with red CI.
+      # No personal token on purpose. Merges made with GITHUB_TOKEN don't fire push workflows, so this
+      # job waits for ci-ok itself, merges, and then starts the deploys with workflow_dispatch, the one
+      # event GitHub does let GITHUB_TOKEN trigger.
+      # Every update type, majors included: a breaking bump fails ci-ok and stays open.
       # Terraform is excluded because a merge to main runs terraform apply (build-and-deploy.yml).
-      - name: Enable auto-merge
+      - name: Wait for ci-ok, merge, deploy
         if: steps.meta.outputs.package-ecosystem != 'terraform'
-        run: gh pr merge --auto --squash "$PR_URL"
         env:
-          PR_URL: ${{ github.event.pull_request.html_url }}
-          # Merges made with GITHUB_TOKEN don't trigger push workflows, so Build & Deploy wouldn't run.
-          # A fine-grained PAT stored as the Dependabot secret AUTOMERGE_TOKEN fixes that.
-          GH_TOKEN: ${{ secrets.AUTOMERGE_TOKEN || secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          # A transient API error reads as "not finished yet", so the loop just polls again
+          state=""
+          for _ in $(seq 1 80); do
+            state=$(gh api "repos/$REPO/commits/$SHA/check-runs?check_name=ci-ok&filter=latest" \
+              -q '.check_runs[0] | if . then .status + ":" + (.conclusion // "") else "" end' || true)
+            case "$state" in
+              completed:success) break ;;
+              completed:*) echo "ci-ok finished as ${state#completed:}; leaving the PR open for a human."; exit 0 ;;
+            esac
+            sleep 30
+          done
+          [ "$state" = "completed:success" ] || { echo "::error::ci-ok didn't finish within 40 minutes"; exit 1; }
+
+          files=$(gh pr diff "$PR" --name-only -R "$REPO")
+
+          # Only the commit that passed: refuses if Dependabot pushed again in the meantime
+          gh pr merge "$PR" --squash --match-head-commit "$SHA" -R "$REPO"
+
+          # Same split as the push triggers: studio/** deploys the studio, everything else the site
+          if echo "$files" | grep -qv '^studio/'; then
+            gh workflow run build-and-deploy.yml --ref main -R "$REPO"
+          fi
+          if echo "$files" | grep -q '^studio/'; then
+            gh workflow run studio-deploy.yml --ref main -R "$REPO"
+          fi
