@@ -1,22 +1,80 @@
+import { Fragment } from "preact";
+import { useEffect, useRef } from "preact/hooks";
 import type { RoutableProps } from "preact-router";
 import { isoDate, PostIndex } from "@/components/blog/PostIndex";
 import { getAllPosts } from "@/data/posts";
+import { heroProgress, unwatchHero, watchHero } from "@/motion/heroProgress";
+import { prefersReducedMotion } from "@/motion/spring";
 import { AsciiPortrait } from "./AsciiPortrait";
 import { Chapter } from "./Chapter";
 import { GetInTouch } from "./GetInTouch";
 import { Projects } from "./Projects";
 
 const HOME_POSTS = 5;
+const NAME = ["felix", "hernandez", "vieyra"];
+
+interface NetworkInformation {
+  saveData?: boolean;
+}
+
+// The shader is code-split and only fetched once the page is idle, after first paint. Reduced motion,
+// Save-Data and no WebGL all keep the static dotted poster instead.
+function useDither(hero: { current: HTMLElement | null }, canvas: { current: HTMLCanvasElement | null }) {
+  useEffect(() => {
+    const el = hero.current;
+    const cv = canvas.current;
+    if (!el || !cv) return;
+    watchHero(el);
+    const saveData = (navigator as Navigator & { connection?: NetworkInformation }).connection?.saveData;
+    if (prefersReducedMotion() || saveData) return () => unwatchHero(el);
+
+    let stop: (() => void) | null = null;
+    let cancelled = false;
+    const boot = () =>
+      import("@/motion/dither").then(async ({ startDither }) => {
+        if (cancelled) return;
+        stop = await startDither({
+          canvas: cv,
+          hero: el,
+          texts: [el.querySelector("h1"), el.querySelector("[data-thesis]")].filter(
+            (x): x is HTMLElement => x !== null,
+          ),
+          quiet: [...el.querySelectorAll<HTMLElement>("[data-margin] > p")],
+          portrait: el.querySelector<HTMLElement>("[data-portrait]"),
+          progress: heroProgress,
+        });
+        // Unmounted while the shader was compiling
+        if (cancelled) stop?.();
+      });
+    const idle = window.requestIdleCallback ?? ((fn: () => void) => window.setTimeout(fn, 300));
+    const handle = idle(() => void boot(), { timeout: 2000 });
+    return () => {
+      cancelled = true;
+      window.cancelIdleCallback?.(handle);
+      stop?.();
+      unwatchHero(el);
+    };
+  }, [hero, canvas]);
+}
 
 export function HeroSection(_props: RoutableProps) {
   const posts = getAllPosts();
   const latest = posts[0];
+  const hero = useRef<HTMLElement>(null);
+  const canvas = useRef<HTMLCanvasElement>(null);
+  useDither(hero, canvas);
 
   return (
     <>
-      <section aria-labelledby="name" className="relative pt-6 pb-14 md:pt-16 md:pb-24 lg:pt-20 lg:pb-28" data-hero>
+      <section
+        ref={hero}
+        aria-labelledby="name"
+        className="hero-poster relative pt-6 pb-14 md:pt-16 md:pb-24 lg:pt-20 lg:pb-28"
+        data-hero
+      >
+        <canvas ref={canvas} aria-hidden="true" tabIndex={-1} className="absolute inset-0 w-full h-full" />
         <div className="page-grid relative z-10">
-          <div className="col-margin meta order-3 md:order-none mt-8 md:mt-0 md:pt-[1.6vw]">
+          <div data-margin className="col-margin meta order-3 md:order-none mt-8 md:mt-0 md:pt-[1.6vw]">
             <p className="text-accent">software engineer</p>
             {latest && (
               <p className="mt-4">
@@ -29,14 +87,26 @@ export function HeroSection(_props: RoutableProps) {
             )}
           </div>
 
+          {/* Split into words for the intro; the heading keeps one unsplit accessible name */}
           <h1
             id="name"
-            className="display text-display col-span-full md:col-start-3 md:col-span-6 lg:col-start-4 lg:col-span-9"
+            aria-label={NAME.join(" ")}
+            className="intro display text-display col-span-full md:col-start-3 md:col-span-6 lg:col-start-4 lg:col-span-9"
           >
-            felix hernandez vieyra
+            {NAME.map((word, i) => (
+              <Fragment key={word}>
+                <span aria-hidden="true" className="intro-word" style={{ "--i": i }}>
+                  {word}
+                </span>
+                {i < NAME.length - 1 && " "}
+              </Fragment>
+            ))}
           </h1>
 
-          <p className="text-lead col-span-full md:col-start-3 md:col-span-6 lg:col-start-4 lg:col-span-5 mt-7 md:mt-10">
+          <p
+            data-thesis
+            className="intro-after text-lead col-span-full md:col-start-3 md:col-span-6 lg:col-start-4 lg:col-span-5 mt-7 md:mt-10"
+          >
             design software for humans, architect solutions for resilience. security must be part of the mvp.{" "}
             <a
               href="https://peps.python.org/pep-0020/#the-zen-of-python"

@@ -383,7 +383,7 @@ a {
 
 /* Drop cap: the display cut, three lines deep */
 .prose .drop-cap::first-letter {
-  font-family: var(--font-display);
+  font-family: "newsreader-initial", Georgia, serif;
   font-weight: 350;
   float: left;
   font-size: 4.9em;
@@ -460,4 +460,106 @@ a {
 .post-body > .code-block,
 .post-body > .figure {
   margin-block: 1.6em;
+}
+
+/* ------------------------------------------------------------------ */
+/* Motion. Everything here is an enhancement: the prerendered page is */
+/* complete without it, and reduced motion renders final states.      */
+/* ------------------------------------------------------------------ */
+
+@keyframes rise {
+  from {
+    transform: translateY(0.32em);
+    opacity: 0;
+  }
+}
+
+@keyframes settle {
+  from {
+    transform: translateY(0.75rem);
+    opacity: 0;
+  }
+}
+
+@keyframes draw {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* One composed beat for the name: the words rise in order, the first with no delay so it paints at once */
+  .intro-word {
+    display: inline-block;
+    animation: rise 760ms var(--ease-out) both;
+    animation-delay: calc(var(--i) * 80ms);
+  }
+
+  /* Then the thesis and the portrait, together */
+  .intro-after {
+    animation: settle 700ms var(--ease-out) 280ms both;
+  }
+
+  @supports (animation-timeline: view()) {
+    /* Chapters settle in as they enter, the way a page turns; the rule above each one draws across first */
+    .reveal {
+      animation: settle linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 55%;
+    }
+
+    .reveal-late {
+      animation-range: entry 10% entry 70%;
+    }
+
+    .chapter-rule::before {
+      transform-origin: left;
+      animation: draw linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 90%;
+    }
+  }
+}
+
+/* Reading progress: a 2px cobalt hairline, scroll-linked by the browser, no JS */
+.read-progress {
+  display: none;
+}
+
+@supports (animation-timeline: scroll()) {
+  .read-progress {
+    display: block;
+    position: fixed;
+    inset: 0 0 auto;
+    height: 2px;
+    z-index: 40;
+    background: var(--color-accent);
+    transform-origin: left;
+    animation: fill linear both;
+    animation-timeline: scroll(root);
+  }
+}
+
+/* The shader's stand-in for reduced motion, Save-Data and no WebGL: a static dot screen, densest on the left */
+.hero-poster::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, var(--color-accent) 0.9px, transparent 1.15px);
+  background-size: 6px 6px;
+  mask-image: linear-gradient(to left, transparent 45%, rgb(0 0 0 / 0.3) 75%, rgb(0 0 0 / 0.55));
+}
+
+.hero-poster[data-dither="on"]::before {
+  display: none;
 }

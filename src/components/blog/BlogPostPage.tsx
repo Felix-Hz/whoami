@@ -53,6 +53,8 @@ export function BlogPostPage({ slug }: BlogPostPageProps) {
 
   return (
     <article>
+      {/* The only motion on a reading page: a hairline that tracks how far through the post you are */}
+      <div className="read-progress" aria-hidden="true" />
       <header className="page-grid pt-8 md:pt-14">
         <div className="col-margin meta order-2 md:order-none mt-6 md:mt-0 md:pt-[1vw] flex flex-wrap md:flex-col gap-x-5 gap-y-0">
           <p>
@@ -82,16 +84,17 @@ export function BlogPostPage({ slug }: BlogPostPageProps) {
           <figure className="col-wide order-3 md:order-none mt-8 md:mt-12">
             <div className="plate aspect-[16/9] md:aspect-[16/7]">
               <img
-                src={`${post.coverImage}?w=1200&fit=max&auto=format`}
+                src={`${post.coverImage}?w=1200&fit=max&auto=format&q=45`}
                 srcSet={[480, 768, 1200, 1600, 2000]
-                  .map((w) => `${post.coverImage}?w=${w}&fit=max&auto=format ${w}w`)
+                  .map((w) => `${post.coverImage}?w=${w}&fit=max&auto=format&q=45 ${w}w`)
                   .join(", ")}
                 sizes="(min-width: 1024px) 75vw, (min-width: 768px) 75vw, 100vw"
                 alt=""
                 width={1600}
                 height={700}
                 loading="eager"
-                // The cover is usually the largest paint on a post; let it win over the font preloads
+                // The cover is usually the largest paint on a post; let it win over the font preloads. Printed in one ink,
+                // so a lower quality setting costs nothing visible and halves the bytes
                 fetchpriority="high"
               />
             </div>

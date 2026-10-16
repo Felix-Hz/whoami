@@ -17,10 +17,10 @@ export function Chapter({ id, n, title, note, children }: ChapterProps) {
         {note && <p className="meta mt-1 max-w-[24ch]">{note}</p>}
       </div>
       <div className="col-main">
-        <h2 id={`${id}-title`} className="display text-section mb-6 md:mb-7">
+        <h2 id={`${id}-title`} className="reveal display text-section mb-6 md:mb-7">
           {title}
         </h2>
-        {children}
+        <div className="reveal reveal-late">{children}</div>
       </div>
     </section>
   );

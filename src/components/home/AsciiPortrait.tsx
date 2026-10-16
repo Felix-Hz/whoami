@@ -1,5 +1,7 @@
 import { useEffect, useRef } from "preact/hooks";
 import { faceAscii } from "@/assets/ascii-face";
+import { heroProgress, onHeroProgress } from "@/motion/heroProgress";
+import { frameClock, prefersReducedMotion, type Spring, spring, spring0 } from "@/motion/spring";
 
 // Density ramp the portrait is drawn with, lightest to darkest
 const RAMP = " .:-=+*#%@";
@@ -18,9 +20,21 @@ const cells: number[][] = lines.map((line) => {
   );
 });
 
-const print = (flip: (row: number, col: number) => number) =>
+// 8x8 ordered-dither threshold per cell, the same matrix the background shader prints with
+const bayer2 = (x: number, y: number) => (Math.floor(x) * 0.5 + Math.floor(y) ** 2 * 0.75) % 1;
+const bayer4 = (x: number, y: number) => bayer2(x / 2, y / 2) * 0.25 + bayer2(x, y);
+const threshold: number[][] = cells.map((row, r) =>
+  row.map((_, c) => (bayer4(c / 2, r / 2) * 0.25 + bayer2(c, r)) % 1),
+);
+
+// flip: 0 prints the portrait, 1 its negative. gone: 0 keeps every character, 1 dissolves them all.
+const print = (flip: (row: number, col: number) => number, gone = 0) =>
   cells
-    .map((row, r) => row.map((v, c) => (v < 0 ? " " : RAMP[Math.round(v + (TOP - 2 * v) * flip(r, c))])).join(""))
+    .map((row, r) =>
+      row
+        .map((v, c) => (v < 0 || threshold[r][c] < gone ? " " : RAMP[Math.round(v + (TOP - 2 * v) * flip(r, c))]))
+        .join(""),
+    )
     .join("\n");
 
 const portrait = print(() => 0);
@@ -49,23 +63,63 @@ const noise = (x: number, y: number) => {
 };
 const smooth = (t: number) => (t <= 0 ? 0 : t >= 1 ? 1 : t * t * (3 - 2 * t));
 
-// Critically damped spring, frame-rate independent
-function spring(s: { x: number; v: number }, target: number, omega: number, dt: number) {
-  const f = 1 + 2 * dt * omega,
-    oo = omega * omega,
-    hoo = dt * oo,
-    hhoo = dt * hoo;
-  const det = 1 / (f + hhoo);
-  const x = (f * s.x + dt * s.v + hhoo * target) * det;
-  s.v = (s.v + hoo * (target - s.x)) * det;
-  s.x = x;
+interface Wave {
+  radius: Spring;
+  origin: { x: number; y: number };
+  pointer: { x: number; y: number; inside: boolean };
+}
+
+// Far enough to cover every cell from the wave's origin, plus the ragged front
+function reachOf(origin: { x: number; y: number }) {
+  const corners = [
+    [0, 0],
+    [COLS, 0],
+    [0, ROWS],
+    [COLS, ROWS],
+  ];
+  return Math.max(...corners.map(([x, y]) => Math.hypot((x - origin.x) * CELL_W, y - origin.y))) + FEATHER * 1.5;
+}
+
+// Advances the wave one frame; true once it has come to rest
+function stepWave(w: Wave, dt: number): boolean {
+  const { radius, origin, pointer } = w;
+  // While inside, the origin drifts after the pointer so the ink leans toward it
+  if (pointer.inside) {
+    const k = 1 - Math.exp(-dt * 2.5);
+    origin.x += (pointer.x - origin.x) * k;
+    origin.y += (pointer.y - origin.y) * k;
+  }
+  const target = pointer.inside ? reachOf(origin) : 0;
+  spring(radius, target, pointer.inside ? 3.2 : 2.6, dt);
+  const still = Math.abs(radius.v) < 0.02;
+  if (!pointer.inside && still && radius.x < 0.05) {
+    radius.x = 0;
+    radius.v = 0;
+    return true;
+  }
+  return pointer.inside && still && radius.x >= target - 0.5;
+}
+
+// How far each cell has turned toward its negative, 0..1, for a wave of radius R at time t
+function waveFlip(w: Wave, t: number) {
+  const R = w.radius.x;
+  const { x: ox, y: oy } = w.origin;
+  if (R <= 0) return () => 0;
+  return (r: number, c: number) => {
+    const d = Math.hypot((c - ox) * CELL_W, r - oy);
+    // The front wobbles with slow noise, so it reads like ink spreading, not a circle
+    const edge = noise(c * 0.11 + t * 0.6, r * 0.16 - t * 0.4) * FEATHER * 0.55;
+    return smooth((R - d + edge) / FEATHER);
+  };
 }
 
 /**
- * Printed straight onto the page in the pixel face. Pointing at it prints its negative: the ink
- * flows out from the pointer in a ragged wave, each character stepping through the ramp toward
- * its opposite, and ebbs back toward wherever the pointer leaves.
- * Without JS the two prints crossfade on hover; with reduced motion they swap instantly.
+ * Printed straight onto the page in the pixel face.
+ * - Pointing at it prints its negative: the ink flows out from the pointer in a ragged wave, each
+ *   character stepping through the ramp toward its opposite, and ebbs back toward where the pointer left.
+ * - Scrolling the hero away dissolves it, character by character in dither order, back into the field.
+ * Without JS the two prints crossfade on hover; with reduced motion the negative swaps instantly and
+ * nothing dissolves.
  */
 export function AsciiPortrait({ className = "" }: { className?: string }) {
   const root = useRef<HTMLDivElement>(null);
@@ -74,70 +128,43 @@ export function AsciiPortrait({ className = "" }: { className?: string }) {
   useEffect(() => {
     const el = root.current;
     const pre = live.current;
-    if (!el || !pre || !matchMedia("(hover: hover)").matches) return;
-    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    el.dataset.fluid = "";
+    if (!el || !pre) return;
+    const reduce = prefersReducedMotion();
+    const hover = matchMedia("(hover: hover)").matches;
+    if (hover) el.dataset.fluid = "";
 
-    const radius = { x: 0, v: 0 };
-    const origin = { x: COLS / 2, y: ROWS / 2 };
-    const pointer = { x: origin.x, y: origin.y, inside: false };
+    const wave: Wave = {
+      radius: spring0(),
+      origin: { x: COLS / 2, y: ROWS / 2 },
+      pointer: { x: COLS / 2, y: ROWS / 2, inside: false },
+    };
+    const { radius, origin, pointer } = wave;
+    const clock = frameClock();
     let raf = 0;
-    let last = 0;
     let shown = portrait;
+    let waving = false;
 
     const toCell = (e: PointerEvent) => {
       const q = pre.getBoundingClientRect();
       return { x: ((e.clientX - q.left) / q.width) * COLS, y: ((e.clientY - q.top) / q.height) * ROWS };
     };
-    // Far enough to cover every cell from the current origin, plus the ragged front
-    const reach = () =>
-      Math.max(
-        ...[
-          [0, 0],
-          [COLS, 0],
-          [0, ROWS],
-          [COLS, ROWS],
-        ].map(([x, y]) => Math.hypot((x - origin.x) * CELL_W, y - origin.y)),
-      ) +
-      FEATHER * 1.5;
 
     const render = (now: number) => {
-      const t = now / 1000;
-      const R = radius.x;
-      const next = print((r, c) => {
-        const d = Math.hypot((c - origin.x) * CELL_W, r - origin.y);
-        // The front wobbles with slow noise, so it reads like ink spreading, not a circle
-        const edge = noise(c * 0.11 + t * 0.6, r * 0.16 - t * 0.4) * FEATHER * 0.55;
-        return smooth((R - d + edge) / FEATHER);
-      });
+      // The dissolve starts once the hero is a fifth of the way gone, and finishes a little before it leaves
+      const gone = reduce ? 0 : smooth((heroProgress() - 0.2) / 0.7);
+      const next = print(waveFlip(wave, now / 1000), gone);
       if (next !== shown) pre.textContent = shown = next;
     };
 
     const tick = (now: number) => {
-      const dt = Math.min(1 / 30, last ? (now - last) / 1000 : 1 / 60);
-      last = now;
-      // While inside, the origin drifts after the pointer so the ink leans toward it
-      if (pointer.inside) {
-        origin.x += (pointer.x - origin.x) * (1 - Math.exp(-dt * 2.5));
-        origin.y += (pointer.y - origin.y) * (1 - Math.exp(-dt * 2.5));
-      }
-      spring(radius, pointer.inside ? reach() : 0, pointer.inside ? 3.2 : 2.6, dt);
+      waving = !stepWave(wave, clock.tick(now));
       render(now);
-      const settled = Math.abs(radius.v) < 0.02 && (pointer.inside ? radius.x >= reach() - 0.5 : radius.x < 0.05);
-      if (settled && !pointer.inside) {
-        radius.x = radius.v = 0;
-        pre.textContent = shown = portrait;
-        raf = 0;
-        return;
-      }
-      // Fully inverted and still: keep breathing the edge only while the front is on the face
-      raf = settled ? 0 : requestAnimationFrame(tick);
+      raf = waving ? requestAnimationFrame(tick) : 0;
     };
     const start = () => {
-      if (!raf) {
-        last = 0;
-        raf = requestAnimationFrame(tick);
-      }
+      if (raf) return;
+      clock.reset();
+      raf = requestAnimationFrame(tick);
     };
 
     const enter = (e: PointerEvent) => {
@@ -161,11 +188,27 @@ export function AsciiPortrait({ className = "" }: { className?: string }) {
       else start();
     };
 
-    el.addEventListener("pointerenter", enter);
-    el.addEventListener("pointermove", move);
-    el.addEventListener("pointerleave", leave);
+    // Scroll only re-prints, once per frame; the wave's own loop already renders every frame while it runs
+    let scrollFrame = 0;
+    const stopScroll = reduce
+      ? () => false
+      : onHeroProgress(() => {
+          if (waving || scrollFrame) return;
+          scrollFrame = requestAnimationFrame((now) => {
+            scrollFrame = 0;
+            render(now);
+          });
+        });
+
+    if (hover) {
+      el.addEventListener("pointerenter", enter);
+      el.addEventListener("pointermove", move);
+      el.addEventListener("pointerleave", leave);
+    }
     return () => {
       cancelAnimationFrame(raf);
+      cancelAnimationFrame(scrollFrame);
+      stopScroll();
       el.removeEventListener("pointerenter", enter);
       el.removeEventListener("pointermove", move);
       el.removeEventListener("pointerleave", leave);
@@ -177,6 +220,7 @@ export function AsciiPortrait({ className = "" }: { className?: string }) {
     <div
       ref={root}
       aria-hidden="true"
+      data-portrait
       className={`group grid font-pixel leading-none select-none text-ink ${className}`}
     >
       <pre

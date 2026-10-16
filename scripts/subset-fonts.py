@@ -136,6 +136,18 @@ def main() -> None:
             f"  font-display: {display};\n"
             "}"
         )
+        if family == "newsreader-display":
+            # The drop cap floats, so a late swap would shove the lines beside it sideways. It gets its own
+            # alias of the same file that never swaps in late: the font is used if it's ready, else Georgia.
+            rules.append(
+                "@font-face {\n"
+                '  font-family: "newsreader-initial";\n'
+                f'  src: url("/src/assets/fonts/{out}") format("woff2");\n'
+                f"  font-style: {style};\n"
+                f"  font-weight: {weight};\n"
+                "  font-display: optional;\n"
+                "}"
+            )
         if fallback:
             # Measured on the instance itself, so the display cut gets its own (narrower) metrics
             rules.append(fallback_rule(family, font, fallback, style, weight))
