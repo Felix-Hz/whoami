@@ -607,7 +607,7 @@ a {
   }
 }
 
-/* The home page's running head: once the header sticks, a paper band at 75% with a hairline under it,
+/* The home page's running head: once the header sticks, a paper band at 90% with a hairline under it,
    like the top of a magazine page. No blur: the field is cleared under it instead (see dither.ts). */
 .site-header {
   border-bottom: 1px solid transparent;
@@ -617,7 +617,7 @@ a {
 }
 
 .site-header[data-stuck] {
-  background-color: color-mix(in srgb, var(--color-paper) 75%, transparent);
+  background-color: color-mix(in srgb, var(--color-paper) 90%, transparent);
   border-bottom-color: var(--color-rule);
 }
 

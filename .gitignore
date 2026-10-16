@@ -23,8 +23,8 @@ terraform.tfvars
 terraform.tfstate
 terraform.tfstate.backup
 
-# Editor directories and files
-!.vscode/extensions.json
+# Editor directories and files (kept locally, never committed)
+.vscode
 .idea
 .DS_Store
 *.suo
@@ -33,6 +33,8 @@ terraform.tfstate.backup
 *.sln
 *.sw?
 .env
+# Local-only notes on the env vars
+.env.example
 src/generated/*.json
 # Studio
 studio/.env
