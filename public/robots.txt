@@ -1,2 +1,4 @@
 User-agent: *
 Allow: /
+
+Sitemap: https://felix-hzv.dev/sitemap.xml

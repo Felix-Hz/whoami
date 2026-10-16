@@ -118,6 +118,39 @@ def fallback_rule(family: str, font: TTFont, kind: str, style: str, weight: str)
     )
 
 
+# Static TTF cuts for the build-time OG images (satori reads neither woff2 nor variable fonts)
+OG_OUT = ROOT / "fonts" / "og"
+OG_FONTS = [
+    # source, output, axis pins, unicodes
+    ("Newsreader[opsz,wght].ttf", "newsreader-display.ttf", {"opsz": 72, "wght": 350}),
+    ("Newsreader[opsz,wght].ttf", "newsreader.ttf", {"opsz": 16, "wght": 400}),
+    ("JetBrainsMono[wght].ttf", "jetbrains-mono.ttf", {"wght": 400}),
+    ("DepartureMono-Regular.otf", "departure-mono.otf", None),
+]
+
+
+def build_og() -> None:
+    OG_OUT.mkdir(parents=True, exist_ok=True)
+    for src, out, limits in OG_FONTS:
+        font = TTFont(SOURCE / src, lazy=False)
+        if limits:
+            font = instancer.instantiateVariableFont(font, limits)
+            buffer = BytesIO()
+            font.save(buffer)
+            buffer.seek(0)
+            font = TTFont(buffer, lazy=False)
+        options = subset.Options()
+        options.layout_features = ["kern", "liga"]
+        options.hinting = False
+        options.name_IDs = ["*"]
+        options.notdef_outline = True
+        subsetter = subset.Subsetter(options)
+        subsetter.populate(unicodes=TEXT_UNICODES if "departure" not in out else PIXEL_UNICODES)
+        subsetter.subset(font)
+        font.save(OG_OUT / out)
+        print(f"og/{out}: {(OG_OUT / out).stat().st_size / 1024:.1f} KB")
+
+
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     for stale in OUT.glob("*.woff2"):
@@ -168,6 +201,7 @@ def main() -> None:
         raise SystemExit("index.html needs one <!-- fonts:start --> ... <!-- fonts:end --> block")
     INDEX.write_text(html)
     print("Updated the preloads and @font-face block in index.html")
+    build_og()
 
 
 if __name__ == "__main__":

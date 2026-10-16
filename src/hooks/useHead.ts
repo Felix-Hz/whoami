@@ -1,12 +1,5 @@
 import { useEffect } from "preact/hooks";
-import { collectHead } from "@/head";
-
-interface HeadOptions {
-  title: string;
-  description: string;
-  url: string;
-  image?: string;
-}
+import { collectHead, type HeadMeta } from "@/head";
 
 function setMeta(attr: string, value: string, key: "name" | "property" = "name") {
   let el = document.querySelector(`meta[${key}="${attr}"]`);
@@ -18,8 +11,8 @@ function setMeta(attr: string, value: string, key: "name" | "property" = "name")
   el.setAttribute("content", value);
 }
 
-export function useHead({ title, description, url, image }: HeadOptions) {
-  collectHead({ title, description, url, image });
+export function useHead({ title, description, url, image, type = "website", publishedTime }: HeadMeta) {
+  collectHead({ title, description, url, image, type, publishedTime });
 
   useEffect(() => {
     document.title = title;
@@ -27,7 +20,8 @@ export function useHead({ title, description, url, image }: HeadOptions) {
     setMeta("og:title", title, "property");
     setMeta("og:description", description, "property");
     setMeta("og:url", url, "property");
-    setMeta("og:type", "article", "property");
+    setMeta("og:type", type, "property");
+    if (publishedTime) setMeta("article:published_time", publishedTime, "property");
     setMeta("twitter:card", image ? "summary_large_image" : "summary");
     setMeta("twitter:title", title);
     setMeta("twitter:description", description);
@@ -35,5 +29,5 @@ export function useHead({ title, description, url, image }: HeadOptions) {
       setMeta("og:image", image, "property");
       setMeta("twitter:image", image);
     }
-  }, [title, description, url, image]);
+  }, [title, description, url, image, type, publishedTime]);
 }

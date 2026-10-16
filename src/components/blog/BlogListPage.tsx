@@ -10,6 +10,7 @@ export function BlogListPage(_props: RoutableProps) {
     title: "writing | felix hernandez vieyra",
     description: "thoughts on software engineering, web development, and technology.",
     url: "https://felix-hzv.dev/blog",
+    image: "https://felix-hzv.dev/og/home.png",
   });
 
   return (

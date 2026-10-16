@@ -30,7 +30,10 @@ export function BlogPostPage({ slug }: BlogPostPageProps) {
     title: post ? `${post.title} | felix hernandez vieyra` : "post not found",
     description: post?.excerpt || "blog post",
     url: `https://felix-hzv.dev/blog/${slug || ""}`,
-    image: post?.coverImage || undefined,
+    // Generated at build time by scripts/og.ts
+    image: post ? `https://felix-hzv.dev/og/${post.slug}.png` : undefined,
+    type: post ? "article" : "website",
+    publishedTime: post?.publishedAt,
   });
 
   if (!post) {

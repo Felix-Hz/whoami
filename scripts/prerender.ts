@@ -8,7 +8,9 @@ import { BlogPostPage } from "../src/components/blog/BlogPostPage";
 import { HeroSection } from "../src/components/home/HeroSection";
 import { Layout } from "../src/components/layout/Layout";
 import { getAllPosts } from "../src/data/posts";
-import { flushHead } from "../src/head";
+import { flushHead, type HeadMeta } from "../src/head";
+import { rss, sitemap } from "./feeds";
+import { homeImage, postImage } from "./og";
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const distDir = resolve(scriptDir, "../dist");
@@ -19,10 +21,11 @@ interface Route {
   element: ReturnType<typeof h>;
 }
 
-const defaultHead = {
+const defaultHead: HeadMeta = {
   title: "felix hernandez vieyra | whoami",
   description: "software engineer. building for humans. simple > complex.",
   url: "https://felix-hzv.dev",
+  image: "https://felix-hzv.dev/og/home.png",
 };
 
 // Must mirror App's tree (Layout > div > page), or hydration throws the prerendered DOM away
@@ -46,7 +49,7 @@ function escapeAttr(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
 }
 
-function injectMeta(html: string, meta: { title: string; description: string; url: string; image?: string }): string {
+function injectMeta(html: string, meta: HeadMeta): string {
   let out = html;
   out = out.replace(/<title>.*?<\/title>/, `<title>${escapeAttr(meta.title)}</title>`);
   out = out.replace(/(<meta\s+name="description"\s+content=").*?(")/, `$1${escapeAttr(meta.description)}$2`);
@@ -61,6 +64,16 @@ function injectMeta(html: string, meta: { title: string; description: string; ur
     out = out.replace(/(<meta\s+name="twitter:card"\s+content=").*?(")/, "$1summary_large_image$2");
     out = out.replace(/(<meta\s+property="og:image"\s+content=").*?(")/, `$1${escapeAttr(meta.image)}$2`);
     out = out.replace(/(<meta\s+name="twitter:image"\s+content=").*?(")/, `$1${escapeAttr(meta.image)}$2`);
+  }
+
+  if (meta.type === "article") {
+    out = out.replace(/(<meta\s+property="og:type"\s+content=")[^"]*(")/, "$1article$2");
+    if (meta.publishedTime) {
+      out = out.replace(
+        /(<meta\s+property="og:type"\s+content="article"\s*\/>)/,
+        `$1\n        <meta property="article:published_time" content="${escapeAttr(meta.publishedTime)}" />`,
+      );
+    }
   }
 
   return out;
@@ -98,5 +111,14 @@ for (const route of routes) {
   writeFileSync(filePath, html);
   console.log(`  ${route.path} -> ${filePath.replace(distDir, "dist")}`);
 }
+
+// Feeds and share images, from the same posts the pages were built from
+const posts = getAllPosts();
+writeFileSync(resolve(distDir, "rss.xml"), rss(posts));
+writeFileSync(resolve(distDir, "sitemap.xml"), sitemap(posts));
+mkdirSync(resolve(distDir, "og"), { recursive: true });
+writeFileSync(resolve(distDir, "og/home.png"), await homeImage());
+for (const post of posts) writeFileSync(resolve(distDir, `og/${post.slug}.png`), await postImage(post));
+console.log(`  rss.xml, sitemap.xml and ${posts.length + 1} OG images`);
 
 console.log("Prerendering complete.");

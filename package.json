@@ -28,11 +28,13 @@
   "devDependencies": {
     "@biomejs/biome": "2.4.8",
     "@preact/preset-vite": "^2.10.6",
+    "@resvg/resvg-js": "2.6.2",
     "@sanity/types": "^5.31.2",
     "@types/node": "^25.9.9",
     "concurrently": "^10.0.6",
     "groq": "^6.19.0",
     "preact-render-to-string": "^6.8.0",
+    "satori": "0.12.2",
     "shiki": "^4.5.0",
     "tsx": "^4.23.15",
     "typescript": "~5.9.3",
