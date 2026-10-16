@@ -1,17 +1,61 @@
-import { useRef } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 import { DitherKnob } from "@/components/ui/DitherKnob";
 import { Logo } from "@/components/ui/Logo";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { trackSocialClick } from "@/utils/analytics";
 import { CHAPTERS, OUTBOUND } from "./links";
 
-function Chapters({ onNavigate }: { onNavigate?: () => void }) {
+function Chapters({ onNavigate, active }: { onNavigate?: () => void; active?: string | null }) {
   return CHAPTERS.map((c) => (
-    <a key={c.href} href={c.href} onClick={onNavigate} className="text-ink-2 hover:text-accent">
+    <a
+      key={c.href}
+      href={c.href}
+      onClick={onNavigate}
+      aria-current={active === c.section ? "location" : undefined}
+      className="text-ink-2 hover:text-accent"
+    >
       <span className="font-pixel text-accent mr-[0.4em]">{c.n}</span>
       {c.label}
     </a>
   ));
+}
+
+// On the home page the header sticks, and turns into a running head once it does: a translucent
+// paper band with a hairline under it, marking the chapter you're reading.
+function useRunningHead(home: boolean, sentinel: { current: HTMLElement | null }) {
+  const [stuck, setStuck] = useState(false);
+  const [active, setActive] = useState<string | null>(null);
+
+  useEffect(() => {
+    const el = sentinel.current;
+    if (!home || !el) return;
+    // The sentinel sits just above the header; once it scrolls out of view, the header is stuck
+    const stick = new IntersectionObserver(([e]) => setStuck(!e.isIntersecting));
+    stick.observe(el);
+    // A chapter counts as current while it crosses the band just under the header
+    const spy = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) if (e.isIntersecting) setActive(e.target.id);
+      },
+      { rootMargin: "-20% 0px -70% 0px" },
+    );
+    const sections = CHAPTERS.map((c) => document.getElementById(c.section)).filter((x): x is HTMLElement => !!x);
+    for (const s of sections) spy.observe(s);
+    const hero = document.querySelector("[data-hero]");
+    const top = new IntersectionObserver(([e]) => e.isIntersecting && setActive(null), {
+      rootMargin: "-20% 0px -70% 0px",
+    });
+    if (hero) top.observe(hero);
+    return () => {
+      stick.disconnect();
+      spy.disconnect();
+      top.disconnect();
+      setStuck(false);
+      setActive(null);
+    };
+  }, [home, sentinel]);
+
+  return { stuck: home && stuck, active: home ? active : null };
 }
 
 function Outbound() {
@@ -52,52 +96,62 @@ function Controls({ home }: { home: boolean }) {
 
 export function Header({ home = false }: { home?: boolean }) {
   const menu = useRef<HTMLDetailsElement>(null);
+  const sentinel = useRef<HTMLDivElement>(null);
+  const { stuck, active } = useRunningHead(home, sentinel);
   const close = () => {
     if (menu.current) menu.current.open = false;
   };
 
   return (
-    <header className="page-grid items-baseline py-6 md:py-7 relative z-20">
-      <div className="col-span-2 md:col-span-3">
-        <Logo />
-      </div>
+    <>
+      <div ref={sentinel} aria-hidden="true" className="h-px -mb-px" />
+      <header
+        data-stuck={stuck ? "" : undefined}
+        className={`site-header z-20 ${home ? "sticky top-[env(safe-area-inset-top,0px)]" : "relative"}`}
+      >
+        <div className="page-grid items-baseline py-6 md:py-7">
+          <div className="col-span-2 md:col-span-3">
+            <Logo />
+          </div>
 
-      {/* Desktop and tablet: chapters, then outbound links after a hairline */}
-      <nav aria-label="Main" className="hidden md:flex md:col-span-5 lg:col-span-9 justify-end items-baseline meta">
-        <div className="flex gap-7">
-          <Chapters />
-        </div>
-        <div className="flex gap-6 ml-7 pl-7 border-l border-rule">
-          <Outbound />
-        </div>
-        <div className="flex items-center gap-1 ml-5 pl-4 border-l border-rule self-center">
-          <Controls home={home} />
-        </div>
-      </nav>
-
-      {/* Phones: one quiet toggle; works without JS because it's a <details> */}
-      <div className="md:hidden col-span-2 justify-self-end flex items-center">
-        <div className="flex items-center gap-0.5 mr-3 pr-3 border-r border-rule">
-          <Controls home={home} />
-        </div>
-        <details ref={menu} className="group">
-          <summary className="meta text-ink-2 list-none cursor-pointer select-none py-3 -my-3 [&::-webkit-details-marker]:hidden">
-            index <span className="font-pixel text-accent group-open:hidden">+</span>
-            <span className="font-pixel text-accent hidden group-open:inline">−</span>
-          </summary>
-          <nav
-            aria-label="Main"
-            className="absolute left-0 right-0 top-full z-30 bg-paper border-b border-rule px-gutter pt-2 pb-6 font-mono text-small text-ink-2 flex flex-col"
-          >
-            <div className="flex flex-col [&>a]:py-2.5 [&>a]:border-b [&>a]:border-rule">
-              <Chapters onNavigate={close} />
+          {/* Desktop and tablet: chapters, then outbound links after a hairline */}
+          <nav aria-label="Main" className="hidden md:flex md:col-span-5 lg:col-span-9 justify-end items-baseline meta">
+            <div className="flex gap-7">
+              <Chapters active={active} />
             </div>
-            <div className="flex gap-6 pt-4">
+            <div className="flex gap-6 ml-7 pl-7 border-l border-rule">
               <Outbound />
             </div>
+            <div className="flex items-center gap-1 ml-5 pl-4 border-l border-rule self-center">
+              <Controls home={home} />
+            </div>
           </nav>
-        </details>
-      </div>
-    </header>
+
+          {/* Phones: one quiet toggle; works without JS because it's a <details> */}
+          <div className="md:hidden col-span-2 justify-self-end flex items-center">
+            <div className="flex items-center gap-0.5 mr-3 pr-3 border-r border-rule">
+              <Controls home={home} />
+            </div>
+            <details ref={menu} className="group">
+              <summary className="meta text-ink-2 list-none cursor-pointer select-none py-3 -my-3 [&::-webkit-details-marker]:hidden">
+                index <span className="font-pixel text-accent group-open:hidden">+</span>
+                <span className="font-pixel text-accent hidden group-open:inline">−</span>
+              </summary>
+              <nav
+                aria-label="Main"
+                className="absolute left-0 right-0 top-full z-30 bg-paper border-b border-rule px-gutter pt-2 pb-6 font-mono text-small text-ink-2 flex flex-col"
+              >
+                <div className="flex flex-col [&>a]:py-2.5 [&>a]:border-b [&>a]:border-rule">
+                  <Chapters onNavigate={close} />
+                </div>
+                <div className="flex gap-6 pt-4">
+                  <Outbound />
+                </div>
+              </nav>
+            </details>
+          </div>
+        </div>
+      </header>
+    </>
   );
 }

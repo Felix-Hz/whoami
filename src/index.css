@@ -606,3 +606,31 @@ a {
     transition: none;
   }
 }
+
+/* The home page's running head: once the header sticks, a paper band at 75% with a hairline under it,
+   like the top of a magazine page. No blur: the field is cleared under it instead (see dither.ts). */
+.site-header {
+  border-bottom: 1px solid transparent;
+  transition:
+    background-color 240ms var(--ease-out),
+    border-color 240ms var(--ease-out);
+}
+
+.site-header[data-stuck] {
+  background-color: color-mix(in srgb, var(--color-paper) 75%, transparent);
+  border-bottom-color: var(--color-rule);
+}
+
+/* The chapter you're reading, marked in the running head */
+.site-header a[aria-current="location"] {
+  color: var(--color-ink);
+  text-decoration-line: underline;
+  text-decoration-color: var(--color-accent);
+  text-underline-offset: 0.55em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-header {
+    transition: none;
+  }
+}

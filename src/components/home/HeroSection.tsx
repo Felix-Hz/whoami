@@ -56,6 +56,7 @@ function useDither(hero: { current: HTMLElement | null }, canvas: { current: HTM
         portrait: el.querySelector<HTMLElement>("[data-portrait]"),
         progress: heroProgress,
         knob: ditherParams(ditherLevel()),
+        header: document.querySelector<HTMLElement>(".site-header"),
       });
       booting = false;
       if (cancelled) {

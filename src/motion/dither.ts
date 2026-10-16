@@ -26,7 +26,7 @@ const TEXT_CLEAR = 1 - (1 - PORTRAIT_CLEAR) * 0.85;
 const VERT = "attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}";
 const FRAG = `precision highp float;
 uniform vec2 r;uniform float t;uniform vec2 m;uniform float mi;uniform vec3 ink;uniform vec3 paper;
-uniform float scroll;uniform vec4 H;uniform vec3 K;
+uniform float scroll;uniform vec4 H;uniform vec3 K;uniform float band;
 uniform vec4 L[${MAX_BOXES}];uniform vec4 P[${MAX_BOXES}];uniform float pad;
 float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1.,0.)),f.x),mix(h(i+vec2(0.,1.)),h(i+vec2(1.,1.)),f.x),f.y);}
@@ -58,13 +58,16 @@ void main(){
     k=max(k,box*max(reveal,s.w));
   }
   v*=1.-k;
+  // Under the stuck header (the home page's running head) the page stays clear: a soft fade, then nothing
+  float hb=smoothstep(r.y-band-pad*4.,r.y-band,px.y)*smoothstep(0.,pad,band);
+  v*=1.-hb;
   // A hair of bias keeps empty paper clean without swallowing the faint end of the knob
   float field=step(b8(pg)+.004,v*.85);
   // The pointer lens is its own dithered bitmap, XOR'd with the field: where it meets the field it prints
   // the negative (dots become gaps, gaps become dots); over empty paper it's a light lens of its own.
   // It steps aside wherever type is clear.
   float d=length(px-m)/r.x*1.6;
-  float l=mi*exp(-d*d*64.)*(1.-k)*(.38+.62*smoothstep(.02,.2,v))*mix(.6,1.,inHero);
+  float l=mi*exp(-d*d*64.)*(1.-k)*(1.-hb)*(.38+.62*smoothstep(.02,.2,v))*mix(.6,1.,inHero);
   float lens=step(b8(pg+vec2(3.,5.))+.02,l*.95);
   gl_FragColor=vec4(mix(paper,ink,abs(field-lens)),1.);
 }`;
@@ -114,6 +117,8 @@ export interface DitherOptions {
   portrait?: HTMLElement | null;
   progress: () => number;
   knob?: KnobParams;
+  // The site header; while it's stuck (data-stuck) the field stays clear underneath it
+  header?: HTMLElement | null;
 }
 
 function parseColor(value: string): [number, number, number] {
@@ -239,7 +244,7 @@ async function compile(gl: WebGLRenderingContext) {
   gl.enableVertexAttribArray(attr);
   gl.vertexAttribPointer(attr, 2, gl.FLOAT, false, 0, 0);
   return Object.fromEntries(
-    ["r", "t", "m", "mi", "ink", "paper", "scroll", "H", "K", "L", "P", "pad"].map((k) => [
+    ["r", "t", "m", "mi", "ink", "paper", "scroll", "H", "K", "band", "L", "P", "pad"].map((k) => [
       k,
       gl.getUniformLocation(program, k),
     ]),
@@ -272,6 +277,7 @@ export async function startDither({
   portrait,
   progress,
   knob = ditherParams(LEVEL_DEFAULT),
+  header = null,
 }: DitherOptions): Promise<DitherHandle | null> {
   const gl = canvas.getContext("webgl", { antialias: false, alpha: false, powerPreference: "low-power" });
   if (!gl) return null;
@@ -291,6 +297,8 @@ export async function startDither({
   const px = spring0(-1e4);
   const py = spring0(-1e4);
   const lens = spring0();
+  const band = spring0();
+  let headerHeight = 0;
   const L = new Float32Array(MAX_BOXES * 4);
   const P = new Float32Array(MAX_BOXES * 4);
   const clock = frameClock();
@@ -319,6 +327,7 @@ export async function startDither({
     for (const b of blocks) measureBlock(b);
     if (portraitBlock) measureBlock(portraitBlock);
     heroBox = toPage(hero.getBoundingClientRect());
+    headerHeight = header?.offsetHeight ?? 0;
   };
 
   const step = (dt: number) => {
@@ -328,6 +337,7 @@ export async function startDither({
     // The lens is for open paper; while you're reading the hero it steps aside instead of crowding the line
     const reading = blocks.some((b) => b.open);
     spring(lens, pointer.inside && !reading ? 1 : 0, reading ? 10 : 6, dt);
+    spring(band, header && "stuck" in header.dataset ? headerHeight : 0, 12, dt);
   };
 
   // The canvas sits at the last whole canvas pixel above the scroll position, nudged up by the remainder
@@ -381,6 +391,7 @@ export async function startDither({
     gl.uniform1f(u.scroll, top * SCALE);
     gl.uniform2f(u.m, px.x * SCALE, (cssHeight - (py.x - top)) * SCALE);
     gl.uniform1f(u.mi, lens.x);
+    gl.uniform1f(u.band, Math.max(0, band.x) * SCALE);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   };
 
@@ -388,6 +399,7 @@ export async function startDither({
   const busy = () =>
     lens.x > 0.001 ||
     Math.abs(lens.v) > 0.001 ||
+    Math.abs(band.v) > 0.01 ||
     blocks.some((b) => b.open || b.rd.x > 0) ||
     performance.now() - lastActive < 600;
 

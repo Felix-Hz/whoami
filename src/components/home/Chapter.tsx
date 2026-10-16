@@ -11,7 +11,7 @@ interface ChapterProps {
 // One numbered chapter of the home page: the number and a note sit in the margin, the content in the main column
 export function Chapter({ id, n, title, note, children }: ChapterProps) {
   return (
-    <section id={id} aria-labelledby={`${id}-title`} className="page-grid chapter-rule py-chapter scroll-mt-6">
+    <section id={id} aria-labelledby={`${id}-title`} className="page-grid chapter-rule py-chapter scroll-mt-24">
       <div className="col-margin mb-4 md:mb-0">
         <span className="font-pixel text-accent text-small">{n}</span>
         {note && <p className="meta mt-1 max-w-[24ch]">{note}</p>}
