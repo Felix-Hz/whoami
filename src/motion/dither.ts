@@ -18,9 +18,9 @@ const SCALE = 1 / 3; // canvas pixels per CSS pixel
 const STEP = 1 / SCALE; // CSS px per canvas pixel: the canvas moves in whole steps of this, so dots never shimmer
 const PAD = 12; // CSS px of air around a line of type; the feather adds five times this
 // How much of the field each kind of block clears at rest, 0..1. The portrait keeps a fifth of the dither;
-// type keeps 15 points less than that, so it always reads
+// type keeps 15% fewer dots than the portrait does
 const PORTRAIT_CLEAR = 0.8;
-const TEXT_CLEAR = PORTRAIT_CLEAR + 0.15;
+const TEXT_CLEAR = 1 - (1 - PORTRAIT_CLEAR) * 0.85;
 
 const VERT = "attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}";
 const FRAG = `precision highp float;
