@@ -1,4 +1,5 @@
 import { PortableText } from "@portabletext/react";
+import { useMemo } from "preact/hooks";
 import type { RoutableProps } from "preact-router";
 import { authoringSlot } from "@/authoring-slot";
 import { getPostBySlug } from "@/data/posts";
@@ -17,6 +18,8 @@ function formatDate(iso: string): string {
 
 export function BlogPostPage({ slug }: BlogPostPageProps) {
   const post = slug ? getPostBySlug(slug) : undefined;
+  // Stable renderers: new component functions on every render would remount the whole body
+  const components = useMemo(() => createPortableTextComponents(post?.body ?? []), [post]);
 
   useHead({
     title: post ? `${post.title} | felix hernandez vieyra` : "post not found",
@@ -103,9 +106,17 @@ export function BlogPostPage({ slug }: BlogPostPageProps) {
           <div className="mb-10 animate-fade-up" style={{ animationDelay: "150ms" }}>
             <img
               src={`${post.coverImage}?w=960&fit=max&auto=format`}
+              srcSet={[480, 768, 960, 1440]
+                .map((w) => `${post.coverImage}?w=${w}&fit=max&auto=format ${w}w`)
+                .join(", ")}
+              sizes="(min-width: 768px) 768px, 100vw"
               alt=""
+              width={1440}
+              height={617}
               className="w-full aspect-[21/9] object-cover rounded-sm"
               loading="eager"
+              // The cover is usually the largest paint on a post; let it win over the font preloads
+              fetchpriority="high"
             />
             {post.coverImageCredit && (
               <p className="mt-2 text-xs text-text-tertiary text-right tracking-wide italic">{post.coverImageCredit}</p>
@@ -114,7 +125,7 @@ export function BlogPostPage({ slug }: BlogPostPageProps) {
         )}
 
         <div className="text-base md:text-lg animate-fade-up" style={{ animationDelay: "200ms" }}>
-          <PortableText value={post.body} components={createPortableTextComponents()} />
+          <PortableText value={post.body} components={components} />
         </div>
 
         <div className="end-mark" aria-hidden="true">

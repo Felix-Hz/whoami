@@ -1,7 +1,9 @@
 import type { PortableTextComponents } from "@portabletext/react";
+import type { PostBodyBlock } from "@/types/blog";
 
-export function createPortableTextComponents(): PortableTextComponents {
-  let firstParagraphRendered = false;
+export function createPortableTextComponents(body: PostBodyBlock[]): PortableTextComponents {
+  // Decided from the data, not a render-time flag, so re-renders keep the drop cap in place
+  const firstParagraphKey = body.find((block) => block._type === "block" && block.style === "normal")?._key;
 
   return {
     block: {
@@ -21,9 +23,8 @@ export function createPortableTextComponents(): PortableTextComponents {
       h4: ({ children }) => (
         <h4 className="font-[var(--font-heading)] text-lg md:text-xl text-text-primary mt-6 mb-2">{children}</h4>
       ),
-      normal: ({ children }) => {
-        if (!firstParagraphRendered) {
-          firstParagraphRendered = true;
+      normal: ({ children, value }) => {
+        if (value._key === firstParagraphKey) {
           return <p className="drop-cap text-text-secondary leading-relaxed mb-5">{children}</p>;
         }
         return <p className="text-text-secondary leading-relaxed mb-5">{children}</p>;

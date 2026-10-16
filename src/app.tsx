@@ -19,7 +19,8 @@ export function App() {
   const [url, setUrl] = useState("");
 
   const handleRouteChange = useCallback((e: RouterOnChangeArgs) => {
-    setUrl(e.url);
+    // Only the dev toolbar needs the url; a state update in production would re-render the hydrated page
+    if (authoringSlot.Toolbar) setUrl(e.url);
     if (isFirstRender.current) {
       isFirstRender.current = false;
       return;

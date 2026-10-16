@@ -25,15 +25,20 @@ const defaultHead = {
   url: "https://felix-hzv.dev",
 };
 
+// Must mirror App's tree (Layout > div > page), or hydration throws the prerendered DOM away
+function page(content: ReturnType<typeof h>) {
+  return h(Layout, null, h("div", null, content));
+}
+
 const routes: Route[] = [
-  { path: "/", element: h(Layout, null, h(HeroSection, null)) },
-  { path: "/blog", element: h(Layout, null, h(BlogListPage, null)) },
+  { path: "/", element: page(h(HeroSection, null)) },
+  { path: "/blog", element: page(h(BlogListPage, null)) },
 ];
 
 for (const post of getAllPosts()) {
   routes.push({
     path: `/blog/${post.slug}`,
-    element: h(Layout, null, h(BlogPostPage, { slug: post.slug })),
+    element: page(h(BlogPostPage, { slug: post.slug })),
   });
 }
 
@@ -61,6 +66,20 @@ function injectMeta(html: string, meta: { title: string; description: string; ur
   return out;
 }
 
+// Which markup pulls in each font face (see index.css); a page only preloads the faces it renders
+const FONT_USAGE: Record<string, (body: string) => boolean> = {
+  "supply-sans-ultralight": () => true,
+  "neue-bit-bold": (body) => body.includes("<h1"),
+  "mondwest-regular": (body) => body.includes("<h2"),
+  "whoami-initials": (body) => body.includes("drop-cap") || body.includes("editorial-blockquote"),
+};
+
+function pruneFontPreloads(html: string, body: string): string {
+  return html.replace(/\s*<link rel="preload" href="\/assets\/([a-z-]+)-[\w-]+\.woff2"[^>]*>/g, (tag, face: string) =>
+    FONT_USAGE[face] && !FONT_USAGE[face](body) ? "" : tag,
+  );
+}
+
 console.log(`Prerendering ${routes.length} routes...`);
 
 for (const route of routes) {
@@ -70,6 +89,7 @@ for (const route of routes) {
   let html = template;
   html = html.replace('<div id="app"></div>', `<div id="app">${body}</div>`);
   html = injectMeta(html, head);
+  html = pruneFontPreloads(html, body);
 
   const filePath =
     route.path === "/" ? resolve(distDir, "index.html") : resolve(distDir, route.path.slice(1), "index.html");

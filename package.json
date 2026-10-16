@@ -8,7 +8,7 @@
     "dev:site": "pnpm dev:fetch || echo \"content fetch failed, using existing src/generated/posts.json\"; vite",
     "dev:studio": "pnpm --filter @whoami/studio dev",
     "dev:fetch": "tsx --env-file=.env scripts/fetch-content.ts --preview",
-    "prebuild": "tsx scripts/fetch-content.ts",
+    "prebuild": "tsx --env-file-if-exists=.env scripts/fetch-content.ts",
     "build": "pnpm prebuild && tsc -b && vite build && tsx --tsconfig tsconfig.app.json --import ./scripts/register-preact-compat.ts scripts/prerender.ts",
     "check:leaks": "bash scripts/check-authoring-leak.sh dist",
     "typegen": "pnpm --filter @whoami/studio exec sanity schema extract --enforce-required-fields && pnpm --filter @whoami/studio exec sanity typegen generate",
