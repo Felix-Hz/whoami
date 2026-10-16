@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "pnpm dev:fetch || echo 'content fetch failed, using existing src/generated/posts.json'; vite",
     "dev:fetch": "tsx --env-file=.env scripts/fetch-content.ts",
     "prebuild": "tsx scripts/fetch-content.ts",
     "build": "pnpm prebuild && tsc -b && vite build && tsx --tsconfig tsconfig.app.json --import ./scripts/register-preact-compat.ts scripts/prerender.ts",
@@ -27,6 +27,7 @@
     "@sanity/types": "^5.31.2",
     "@types/node": "^25.9.9",
     "preact-render-to-string": "^6.8.0",
+    "shiki": "^4.5.0",
     "tsx": "^4.23.15",
     "typescript": "~5.9.3",
     "vite": "^8.3.4"

@@ -2,6 +2,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createClient } from "@sanity/client";
+import { createHighlighter } from "shiki";
 
 const projectId = process.env.SANITY_PROJECT_ID;
 const dataset = process.env.SANITY_DATASET || "production";
@@ -16,7 +17,8 @@ const client = createClient({
   projectId,
   dataset,
   token,
-  useCdn: true,
+  // Build-time fetch runs right after a publish webhook; the CDN can still serve the old version
+  useCdn: false,
   apiVersion: "2025-02-06",
 });
 
@@ -57,13 +59,38 @@ function countWords(blocks: unknown[]): number {
   return count;
 }
 
+// Matches the language options of the Code Block in the CMS schema
+const LANGS = ["typescript", "javascript", "html", "css", "python", "bash", "json", "yaml", "go", "rust"];
+
+// Code blocks sit on an inverse surface, so the light site needs a dark theme and vice versa
+const THEMES = { ondark: "vitesse-dark", onlight: "vitesse-light" };
+
+type Highlighter = Awaited<ReturnType<typeof createHighlighter>>;
+
+// Pre-renders code blocks to highlighted HTML so the site ships no highlighter to the browser
+function highlightCode(blocks: unknown[], highlighter: Highlighter): unknown[] {
+  return blocks.map((block) => {
+    if (typeof block !== "object" || block === null) return block;
+    const { _type, code, language } = block as { _type?: string; code?: string; language?: string };
+    if (_type !== "code" || !code) return block;
+
+    const lang = language && LANGS.includes(language) ? language : "text";
+    const html = highlighter.codeToHtml(code, { lang, themes: THEMES, defaultColor: false });
+    // Keep only the inner <code> markup; the site renders its own <pre> wrapper
+    const inner = html.match(/<code[^>]*>([\s\S]*)<\/code><\/pre>$/)?.[1];
+    return inner ? { ...block, html: inner } : block;
+  });
+}
+
 async function main() {
   console.log("Fetching blog posts from Sanity...");
 
   const posts: SanityPost[] = await client.fetch(QUERY);
+  const highlighter = await createHighlighter({ themes: Object.values(THEMES), langs: LANGS });
 
   const enriched = posts.map((post) => ({
     ...post,
+    body: highlightCode(post.body ?? [], highlighter),
     tags: post.tags ?? [],
     coverImageCredit: post.coverImageCredit ?? null,
     readingTime: Math.max(1, Math.round(countWords(post.body ?? []) / 200)),

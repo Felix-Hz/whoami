@@ -75,7 +75,11 @@ export function createPortableTextComponents(): PortableTextComponents {
           <pre
             className={`bg-surface-inverse text-text-inverse p-5 ${value.language ? "rounded-b-sm" : "rounded-sm"} overflow-x-auto text-sm leading-relaxed`}
           >
-            <code className="font-[var(--font-mono)]">{value.code}</code>
+            {value.html ? (
+              <code className="shiki-code font-[var(--font-mono)]" dangerouslySetInnerHTML={{ __html: value.html }} />
+            ) : (
+              <code className="font-[var(--font-mono)]">{value.code}</code>
+            )}
           </pre>
         </div>
       ),

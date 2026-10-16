@@ -328,3 +328,20 @@ h2 {
     transition-duration: 0ms;
   }
 }
+
+/* ------------------------------------------------------------------ */
+/* Syntax Highlighting (Shiki, pre-rendered at build time)             */
+/* ------------------------------------------------------------------ */
+
+/* Code blocks use the inverse surface: dark box on the light site, light box on the dark site */
+.shiki-code span {
+  color: var(--shiki-ondark);
+  font-style: var(--shiki-ondark-font-style);
+  font-weight: var(--shiki-ondark-font-weight);
+}
+
+:root[data-theme="dark"] .shiki-code span {
+  color: var(--shiki-onlight);
+  font-style: var(--shiki-onlight-font-style);
+  font-weight: var(--shiki-onlight-font-weight);
+}
