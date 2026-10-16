@@ -1,7 +1,7 @@
 import { prefersReducedMotion } from "./spring";
 
 // The dither knob's state, 0..10. 0 is off (the static dot grid), 1 is the designed field (the default),
-// and every step up adds a visible amount of ink, to most of the page at 10. Remembered per browser; reduced motion starts off unless the reader turned it on.
+// and every step up adds a visible amount of ink, to most of the page at 10. Remembered per browser; phones and reduced motion start off unless the reader turned it on.
 
 export const LEVEL_MIN = 0;
 export const LEVEL_MAX = 10;
@@ -27,7 +27,11 @@ function stored(): number | null {
 export function ditherLevel(): number {
   if (level === null) {
     const saved = typeof window === "undefined" ? null : stored();
-    level = saved ?? (typeof window !== "undefined" && prefersReducedMotion() ? 0 : LEVEL_DEFAULT);
+    // Off by default on touch phones and for reduced motion; the knob can still turn it on
+    const offByDefault =
+      typeof window !== "undefined" &&
+      (prefersReducedMotion() || matchMedia("(hover: none) and (pointer: coarse)").matches);
+    level = saved ?? (offByDefault ? 0 : LEVEL_DEFAULT);
     if (level > 0) lastOn = level;
   }
   return level;
