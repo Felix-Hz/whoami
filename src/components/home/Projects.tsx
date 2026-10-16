@@ -1,81 +1,53 @@
 import { getAllProjects } from "@/data/projects";
 import type { Project } from "@/types/project";
+import { Chapter } from "./Chapter";
 
-function ProjectCard({ project, index }: { project: Project; index: number }) {
+function Entry({ project }: { project: Project }) {
+  const links = [project.url, project.repo].filter((href): href is string => Boolean(href));
   return (
-    <div className="py-4 first:pt-0 animate-fade-up" style={{ animationDelay: `${600 + index * 100}ms` }}>
-      <div className="flex flex-col gap-2">
-        <h3 className="font-heading text-lg md:text-xl text-text-primary">{project.name}</h3>
-
-        <p className="text-text-secondary text-sm md:text-base leading-relaxed">{project.description}</p>
-
-        {project.url && (
-          <a
-            href={project.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group inline-flex items-baseline font-mono text-sm text-text-primary transition-colors duration-normal focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none"
-          >
-            <span className="text-accent font-bold">$</span>
-            <span className="ml-1.5 group-hover:text-accent transition-colors duration-normal">open</span>
-            <span className="ml-2 text-text-secondary group-hover:underline underline-offset-4 truncate max-w-[200px] md:max-w-none">
-              {project.url}
+    <article className="border-t border-ink border-b border-b-rule py-6 md:py-7 grid gap-y-2 md:grid-cols-[minmax(0,1fr)_auto] md:gap-x-8 items-baseline">
+      <h3 className="display text-section leading-none">{project.name}</h3>
+      {project.tags.length > 0 && (
+        <p className="meta md:text-right">
+          <span className="sr-only">tags: </span>
+          {project.tags.map((tag, i) => (
+            <span key={tag} className="whitespace-nowrap">
+              {i > 0 && " · "}
+              {tag}
             </span>
-            <span className="inline-block ml-2 transition-transform duration-normal group-hover:translate-x-1">
-              &rarr;
-            </span>
-          </a>
-        )}
-
-        <div className="flex flex-col gap-1.5 mt-1">
-          <a
-            href={project.repo}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group inline-flex items-baseline font-mono text-sm text-text-primary transition-colors duration-normal focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none"
-          >
-            <span className="text-accent font-bold">$</span>
-            <span className="ml-1.5 group-hover:text-accent transition-colors duration-normal">git clone</span>
-            <span className="ml-2 text-text-secondary group-hover:underline underline-offset-4 truncate max-w-[200px] md:max-w-none">
-              {project.repo}
-            </span>
-            <span className="inline-block ml-2 transition-transform duration-normal group-hover:translate-x-1">
-              &rarr;
-            </span>
-          </a>
-        </div>
-
-        {project.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-1">
-            {project.tags.map((tag) => (
-              <span
-                key={tag}
-                className="text-xs text-accent border border-accent/25 px-2 py-0.5 rounded-sm tracking-wide"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
+          ))}
+        </p>
+      )}
+      <p className="text-small text-ink-2 md:col-span-2">{project.description}</p>
+      <ul className="md:col-span-2 flex flex-col sm:flex-row gap-x-6 gap-y-1 mt-1 font-mono text-meta">
+        {links.map((href) => (
+          <li key={href}>
+            <a
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-ink underline decoration-accent hover:text-accent"
+            >
+              {href.replace(/^https?:\/\//, "").replace(/\/$/, "")}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </article>
   );
 }
 
 export function Projects() {
   const projects = getAllProjects();
-
   if (projects.length === 0) return null;
 
   return (
-    <div className="animate-fade-up flex flex-col gap-1.5" style={{ animationDelay: "500ms" }}>
-      <span className="uppercase text-xs tracking-[0.15em] text-text-tertiary">projects</span>
-
-      <div className="divide-y divide-border">
-        {projects.map((project, i) => (
-          <ProjectCard key={project.name} project={project} index={i} />
+    <Chapter id="build" n="02" title="build" note="in production">
+      <div className="flex flex-col gap-6">
+        {projects.map((project) => (
+          <Entry key={project.name} project={project} />
         ))}
       </div>
-    </div>
+    </Chapter>
   );
 }

@@ -5,15 +5,20 @@ import { authoringSlot } from "@/authoring-slot";
 import { getPostBySlug } from "@/data/posts";
 import { useHead } from "@/hooks/useHead";
 import { trackBlogPostView } from "@/utils/analytics";
-import { createPortableTextComponents } from "./PortableTextComponents";
+import { isoDate } from "./BlogPostCard";
+import { createPortableTextComponents, Marks } from "./PortableTextComponents";
 import { ShareLinks } from "./ShareLinks";
 
 interface BlogPostPageProps extends RoutableProps {
   slug?: string;
 }
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+function BackLink() {
+  return (
+    <a href="/blog" className="font-mono text-meta text-ink-2 hover:text-accent">
+      <span aria-hidden="true">← </span>contents
+    </a>
+  );
 }
 
 export function BlogPostPage({ slug }: BlogPostPageProps) {
@@ -30,20 +35,14 @@ export function BlogPostPage({ slug }: BlogPostPageProps) {
 
   if (!post) {
     return (
-      <section className="flex-1 px-6 md:px-8 lg:px-16 pt-20 md:pt-24 lg:pt-32 pb-8 md:pb-12 lg:pb-20">
-        <div className="w-full max-w-3xl mx-auto animate-fade-up">
-          <a
-            href="/blog"
-            className="group inline-flex items-baseline font-mono text-sm text-text-secondary mb-8 transition-colors duration-normal"
-          >
-            <span className="text-accent font-bold">$</span>
-            <span className="ml-1.5 group-hover:text-accent transition-colors duration-normal">cd ../blog</span>
-            <span className="inline-block ml-2 transition-transform duration-normal group-hover:-translate-x-1 text-accent">
-              &larr;
-            </span>
-          </a>
-          <h1 className="text-3xl text-text-primary">post not found</h1>
-          <p className="mt-3 text-text-secondary">the post you're looking for doesn't exist.</p>
+      <section className="page-grid pt-8 md:pt-16 pb-chapter">
+        <div className="col-margin meta mb-4 md:mb-0">404</div>
+        <div className="col-main">
+          <h1 className="display text-title">post not found</h1>
+          <p className="text-lead text-ink-2 mt-4">the post you're looking for doesn't exist.</p>
+          <p className="mt-8">
+            <BackLink />
+          </p>
         </div>
       </section>
     );
@@ -53,85 +52,67 @@ export function BlogPostPage({ slug }: BlogPostPageProps) {
   trackBlogPostView(post.slug, post.title);
 
   return (
-    <section className="flex-1 px-6 md:px-8 lg:px-16 pt-20 md:pt-24 lg:pt-32 pb-8 md:pb-12 lg:pb-20">
-      <article className="w-full max-w-3xl mx-auto">
-        <a
-          href="/blog"
-          className="group inline-flex items-baseline font-mono text-sm text-text-secondary mb-8 animate-fade-up transition-colors duration-normal"
-        >
-          <span className="text-accent font-bold">$</span>
-          <span className="ml-1.5 group-hover:text-accent transition-colors duration-normal">cd ../blog</span>
-          <span className="inline-block ml-2 transition-transform duration-normal group-hover:-translate-x-1 text-accent">
-            &larr;
-          </span>
-        </a>
-
-        <header className="mb-10 animate-fade-up" style={{ animationDelay: "100ms" }}>
-          <div className="flex items-center gap-3 text-xs text-text-tertiary tracking-wide mb-3">
-            <span className="font-heading text-sm tracking-normal text-text-secondary">felix hernandez vieyra</span>
-            <span aria-hidden="true">/</span>
-            <time dateTime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
-            <span aria-hidden="true">/</span>
-            <span>{post.readingTime} min read</span>
-            {authoringSlot.Badge && <authoringSlot.Badge post={post} />}
-          </div>
-
-          <h1 className="text-3xl md:text-4xl lg:text-5xl text-text-primary tracking-[-0.04em] leading-[0.95]">
-            {post.title}
-          </h1>
-
+    <article>
+      <header className="page-grid pt-8 md:pt-14">
+        <div className="col-margin meta order-2 md:order-none mt-6 md:mt-0 md:pt-[1vw] flex flex-wrap md:flex-col gap-x-5 gap-y-0">
+          <p>
+            <time dateTime={post.publishedAt}>{isoDate(post.publishedAt)}</time>
+          </p>
+          <p>{post.readingTime} min</p>
+          {authoringSlot.Badge && <authoringSlot.Badge post={post} />}
           {post.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-2">
+            <ul className="w-full md:mt-4">
+              <li className="sr-only">tags</li>
               {post.tags.map((tag) => (
-                <span
+                <li
                   key={tag}
-                  className="text-[10px] text-accent border border-accent/20 bg-accent-subtle px-2 py-0.5 rounded-sm tracking-wide"
+                  className="inline md:block after:content-['_·_'] last:after:content-none md:after:content-none"
                 >
                   {tag}
-                </span>
+                </li>
               ))}
-            </div>
+            </ul>
           )}
-
-          <div className="mt-6 flex items-center gap-3 text-text-tertiary/40" aria-hidden="true">
-            <span className="flex-1 h-px bg-border" />
-            <span className="text-[10px] tracking-[0.3em]">***</span>
-            <span className="flex-1 h-px bg-border" />
-          </div>
-        </header>
-
+        </div>
+        <div className="col-main lg:col-end-12">
+          <h1 className="display text-title">{post.title}</h1>
+          {post.excerpt && <p className="text-lead text-ink-2 mt-5 md:mt-6 max-w-[30em]">{post.excerpt}</p>}
+        </div>
         {post.coverImage && (
-          <div className="mb-10 animate-fade-up" style={{ animationDelay: "150ms" }}>
-            <img
-              src={`${post.coverImage}?w=960&fit=max&auto=format`}
-              srcSet={[480, 768, 960, 1440]
-                .map((w) => `${post.coverImage}?w=${w}&fit=max&auto=format ${w}w`)
-                .join(", ")}
-              sizes="(min-width: 768px) 768px, 100vw"
-              alt=""
-              width={1440}
-              height={617}
-              className="w-full aspect-[21/9] object-cover rounded-sm"
-              loading="eager"
-              // The cover is usually the largest paint on a post; let it win over the font preloads
-              fetchpriority="high"
-            />
-            {post.coverImageCredit && (
-              <p className="mt-2 text-xs text-text-tertiary text-right tracking-wide italic">{post.coverImageCredit}</p>
-            )}
-          </div>
+          <figure className="col-wide order-3 md:order-none mt-8 md:mt-12">
+            <div className="plate aspect-[16/9] md:aspect-[16/7]">
+              <img
+                src={`${post.coverImage}?w=1200&fit=max&auto=format`}
+                srcSet={[480, 768, 1200, 1600, 2000]
+                  .map((w) => `${post.coverImage}?w=${w}&fit=max&auto=format ${w}w`)
+                  .join(", ")}
+                sizes="(min-width: 1024px) 75vw, (min-width: 768px) 75vw, 100vw"
+                alt=""
+                width={1600}
+                height={700}
+                loading="eager"
+                // The cover is usually the largest paint on a post; let it win over the font preloads
+                fetchpriority="high"
+              />
+            </div>
+            {post.coverImageCredit && <figcaption className="meta mt-2">{post.coverImageCredit}</figcaption>}
+          </figure>
         )}
+      </header>
 
-        <div className="text-base md:text-lg animate-fade-up" style={{ animationDelay: "200ms" }}>
-          <PortableText value={post.body} components={components} />
+      <div className="post-body prose page-grid pt-10 md:pt-14">
+        <PortableText value={post.body} components={components} />
+      </div>
+
+      <footer className="page-grid pt-12 pb-chapter">
+        <div className="col-text flex flex-col gap-10">
+          <Marks />
+          <ShareLinks title={post.title} slug={post.slug} url={postUrl} />
+          <p>
+            <BackLink />
+          </p>
         </div>
-
-        <div className="end-mark" aria-hidden="true">
-          &#9670;
-        </div>
-
-        <ShareLinks title={post.title} slug={post.slug} url={postUrl} />
-      </article>
-    </section>
+      </footer>
+    </article>
   );
 }

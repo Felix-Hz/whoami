@@ -49,20 +49,29 @@ export function DeployStatus() {
   }, [inFlight, load]);
 
   if (!data?.enabled) return null;
-  if (data.error) return <span className="text-text-tertiary">{data.error}</span>;
+  if (data.error) return <span className="proof-muted">{data.error}</span>;
 
   return (
-    <ul className="flex flex-col items-end gap-0.5">
+    <ul
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "flex-end",
+        margin: 0,
+        padding: 0,
+        listStyle: "none",
+      }}
+    >
       {data.runs?.map((run) => (
         <li key={run.name}>
           {run.error || !run.status ? (
-            <span className="text-text-tertiary">
+            <span className="proof-muted">
               {run.name}: {run.error || "no runs"}
             </span>
           ) : (
             <a href={run.url} target="_blank" rel="noreferrer" title={run.commit ?? undefined}>
               {MARK[run.status]} {run.name} {run.status}
-              {run.at && <span className="text-text-tertiary"> · {ago(run.at)}</span>}
+              {run.at && <span className="proof-muted"> · {ago(run.at)}</span>}
             </a>
           )}
         </li>

@@ -1,19 +1,13 @@
-export function Logo({ className }: { className?: string }) {
+export function Logo() {
   return (
-    <a href="/" className={`group inline-flex items-baseline font-pixel text-xl ${className ?? ""}`}>
-      <span className="text-accent font-bold">$</span>
-      <span className="ml-1.5 tracking-tight">
-        {"whoami".split("").map((char, i) => (
-          <span
-            key={i}
-            className="text-text-primary transition-colors duration-normal group-hover:text-accent"
-            style={{ transitionDelay: `${i * 40}ms` }}
-          >
-            {char}
-          </span>
-        ))}
-      </span>
-      <span className="inline-block w-[0.5em] h-[1em] bg-text-primary animate-[blink_1s_step-end_infinite] ml-px translate-y-px" />
+    <a
+      href="/"
+      aria-label="whoami, home"
+      className="inline-flex items-baseline font-pixel text-wordmark text-accent hover:text-ink"
+    >
+      <span aria-hidden="true">$ whoami</span>
+      {/* The cursor holds still; motion is reserved for the story, not the chrome */}
+      <span aria-hidden="true" className="inline-block w-[0.55em] h-[1em] bg-current ml-px translate-y-[0.12em]" />
     </a>
   );
 }

@@ -1,76 +1,81 @@
 import type { RoutableProps } from "preact-router";
+import { isoDate, PostIndex } from "@/components/blog/PostIndex";
+import { getAllPosts } from "@/data/posts";
 import { AsciiPortrait } from "./AsciiPortrait";
+import { Chapter } from "./Chapter";
 import { GetInTouch } from "./GetInTouch";
 import { Projects } from "./Projects";
 
-const NAME = "felix hernandez vieyra";
+const HOME_POSTS = 5;
 
 export function HeroSection(_props: RoutableProps) {
+  const posts = getAllPosts();
+  const latest = posts[0];
+
   return (
-    <section className="flex-1 flex items-center px-6 md:px-8 lg:px-16 pt-20 md:pt-24 lg:pt-32 pb-8 md:pb-12 lg:pb-20">
-      {/* Mobile: portrait above name / Desktop: editorial grid */}
-      <div className="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-        {/* ASCII portrait — mobile: compact above name / desktop: right column */}
-        <div className="lg:hidden flex justify-center animate-fade-up" style={{ animationDelay: "50ms" }}>
-          <div className="w-40 sm:w-52">
-            <AsciiPortrait compact />
-          </div>
-        </div>
-
-        {/* Text column */}
-        <div className="lg:col-span-7 flex flex-col items-start gap-8 md:gap-10 text-left">
-          <div className="flex flex-col gap-3 md:gap-0">
-            <h1
-              className="group text-[2.75rem] md:text-7xl lg:text-[7rem] text-text-primary antialiased tracking-[-0.06em] leading-[0.85] md:leading-[0.9] animate-fade-up cursor-default"
-              style={{ animationDelay: "100ms" }}
-            >
-              {NAME.split("").map((char, i) =>
-                char === " " ? (
-                  <span key={i}>&nbsp;</span>
-                ) : (
-                  <span
-                    key={i}
-                    className="transition-colors duration-normal group-hover:text-accent"
-                    style={{ transitionDelay: `${i * 25}ms` }}
-                  >
-                    {char}
-                  </span>
-                ),
-              )}
-            </h1>
-
-            <p
-              className="uppercase text-[10px] md:text-sm tracking-[0.15em] text-text-tertiary font-body animate-fade-up"
-              style={{ animationDelay: "200ms" }}
-            >
-              software engineer | problem solver | tech enthusiast
-            </p>
-
-            <p
-              className="text-base md:text-lg text-text-secondary max-w-2xl leading-[1.7] md:leading-[1.8] pt-2 md:py-4 text-left animate-fade-up"
-              style={{ animationDelay: "300ms" }}
-            >
-              design software for humans, architect solutions for resilience. security must be part of the mvp.{" "}
-              <a
-                href="https://peps.python.org/pep-0020/#the-zen-of-python"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-text-primary underline decoration-accent/40 underline-offset-4 decoration-1 transition-colors duration-normal hover:text-accent hover:decoration-accent"
-              >
-                simple is better than complex, complex is better than complicated.
-              </a>
-            </p>
+    <>
+      <section aria-labelledby="name" className="relative pt-6 pb-14 md:pt-16 md:pb-24 lg:pt-20 lg:pb-28" data-hero>
+        <div className="page-grid relative z-10">
+          <div className="col-margin meta order-3 md:order-none mt-8 md:mt-0 md:pt-[1.6vw]">
+            <p className="text-accent">software engineer</p>
+            {latest && (
+              <p className="mt-4">
+                last entry
+                <br />
+                <a href={`/blog/${latest.slug}`} className="hover:text-accent">
+                  <time dateTime={latest.publishedAt}>{isoDate(latest.publishedAt)}</time>
+                </a>
+              </p>
+            )}
           </div>
 
-          <Projects />
-          <GetInTouch />
-        </div>
+          <h1
+            id="name"
+            className="display text-display col-span-full md:col-start-3 md:col-span-6 lg:col-start-4 lg:col-span-9"
+          >
+            felix hernandez vieyra
+          </h1>
 
-        {/* ASCII portrait — desktop only */}
-        <div className="hidden lg:flex lg:col-span-5 justify-end animate-fade-up" style={{ animationDelay: "200ms" }}>
-          <AsciiPortrait />
+          <p className="text-lead col-span-full md:col-start-3 md:col-span-6 lg:col-start-4 lg:col-span-5 mt-7 md:mt-10">
+            design software for humans, architect solutions for resilience. security must be part of the mvp.{" "}
+            <a
+              href="https://peps.python.org/pep-0020/#the-zen-of-python"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-accent underline hover:decoration-2"
+            >
+              simple is better than complex, complex is better than complicated.
+            </a>
+          </p>
+
+          {/* Phones and tablets: above the name. Desktop: bottom-aligned with the thesis against the right
+              gutter, rising beside the name's last line. Sized in vw so it scales with the grid. */}
+          <AsciiPortrait className="order-first col-span-full mb-8 text-[1.6vw] md:col-start-3 md:col-span-6 md:text-[1.1vw] lg:order-none lg:col-auto lg:mb-0 lg:absolute lg:right-gutter lg:bottom-0 lg:text-[min(0.6vw,9px)]" />
         </div>
-      </div>
-    </section>
+      </section>
+
+      <Chapter id="who" n="01" title="who">
+        <p className="text-lead text-ink-2 max-w-[34em]">
+          jack of all trades, master of none, though often better than a master of one. i care about systems that bend
+          instead of break, and technology is my creative outlet.
+        </p>
+      </Chapter>
+
+      <Projects />
+
+      {posts.length > 0 && (
+        <Chapter id="writing" n="03" title="writing" note="contents">
+          <PostIndex posts={posts.slice(0, HOME_POSTS)} thumbs={false} />
+          <a
+            href="/blog"
+            className="inline-block mt-6 font-mono text-meta text-ink underline decoration-accent hover:text-accent"
+          >
+            all writing →
+          </a>
+        </Chapter>
+      )}
+
+      <GetInTouch />
+    </>
   );
 }

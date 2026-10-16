@@ -4,6 +4,6 @@
     "description": "privacy-first expense tracking webapp",
     "repo": "https://github.com/Felix-Hz/cofr",
     "url": "https://cofr.cash/",
-    "tags": ["finance", "monorepo", "rust-bindings"]
+    "tags": ["self-host", "personal-finance", "FOSS"]
   }
 ]

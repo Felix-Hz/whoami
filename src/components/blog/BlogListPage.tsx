@@ -1,42 +1,43 @@
 import type { RoutableProps } from "preact-router";
 import { getAllPosts } from "@/data/posts";
 import { useHead } from "@/hooks/useHead";
-import { BlogPostCard } from "./BlogPostCard";
+import { PostIndex } from "./PostIndex";
 
 export function BlogListPage(_props: RoutableProps) {
   const posts = getAllPosts();
 
   useHead({
-    title: "blog | felix hernandez vieyra",
+    title: "writing | felix hernandez vieyra",
     description: "thoughts on software engineering, web development, and technology.",
     url: "https://felix-hzv.dev/blog",
   });
 
   return (
-    <section className="flex-1 px-6 md:px-8 lg:px-16 pt-20 md:pt-24 lg:pt-32 pb-8 md:pb-12 lg:pb-20">
-      <div className="w-full max-w-3xl mx-auto">
-        <header className="mb-12 animate-fade-up">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl text-text-primary tracking-[-0.04em] leading-[0.9]">blog</h1>
-          <p className="mt-3 text-text-tertiary text-sm tracking-wide uppercase">
-            writing about software, architecture &amp; the things I learn
-          </p>
-        </header>
-
-        {posts.length === 0 ? (
-          <div className="font-mono text-sm animate-fade-up flex flex-col gap-1" style={{ animationDelay: "100ms" }}>
-            <span>
-              <span className="text-accent font-bold">$</span>
-              <span className="text-text-secondary ml-1.5">ls ./posts</span>
-            </span>
-            <span className="text-text-tertiary">(empty)</span>
-          </div>
-        ) : (
-          <div className="divide-y divide-border">
-            {posts.map((post, i) => (
-              <BlogPostCard key={post.slug} post={post} index={i} />
-            ))}
-          </div>
-        )}
+    <section aria-labelledby="writing-title" className="page-grid pt-8 md:pt-16 pb-chapter">
+      <div className="col-margin mb-4 md:mb-0 md:pt-[1.2vw]">
+        <span className="font-pixel text-accent text-small">03</span>
+        <p className="meta mt-1">
+          contents · {posts.length} {posts.length === 1 ? "entry" : "entries"}
+        </p>
+      </div>
+      <div className="col-main">
+        <h1 id="writing-title" className="display text-title">
+          writing
+        </h1>
+        <p className="text-lead text-ink-2 mt-4 md:mt-6 max-w-[30em]">
+          writing about software, architecture &amp; the things I learn
+        </p>
+        <div className="mt-10 md:mt-14">
+          {posts.length === 0 ? (
+            <p className="meta border-t border-ink pt-5">
+              <span className="text-accent">$</span> ls ./posts
+              <br />
+              (empty)
+            </p>
+          ) : (
+            <PostIndex posts={posts} />
+          )}
+        </div>
       </div>
     </section>
   );

@@ -55,20 +55,17 @@ export function Toolbar({ url }: { url: string }) {
   if (path !== "/blog" && !slug) return null;
 
   return (
-    <aside
-      aria-label="Authoring tools (dev only)"
-      className="authoring-toolbar fixed bottom-4 right-4 z-50 flex flex-col gap-2 items-end font-mono text-xs bg-surface-elevated text-text-primary border border-border-strong p-2 [&_a]:underline [&_button]:underline [&_button]:cursor-pointer [&_button:disabled]:opacity-50"
-    >
-      <div className="flex items-center gap-3">
+    <aside aria-label="Authoring tools (dev only)" className="authoring-toolbar">
+      <div style={{ display: "flex", alignItems: "baseline", gap: 12 }}>
         <button
           type="button"
           onClick={toggle}
           aria-expanded={!collapsed}
           aria-controls="authoring-tools"
           title={collapsed ? "Show dev tools" : "Collapse dev tools"}
-          className="text-text-tertiary !no-underline"
+          className="proof-label"
         >
-          {collapsed ? "dev ▸" : "dev ▾"}
+          {collapsed ? "proof ▸" : "proof ▾"}
         </button>
         {!collapsed && <RefreshButton />}
         {!collapsed && path === "/blog" && (

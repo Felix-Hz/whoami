@@ -3,7 +3,7 @@ import { dirname, resolve } from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 import { createClient } from "@sanity/client";
-import { createHighlighter } from "shiki";
+import { createCssVariablesTheme, createHighlighter } from "shiki";
 import type { POSTS_QUERY_RESULT } from "../src/generated/sanity.types";
 import { POSTS_QUERY, PREVIEW_POSTS_QUERY, PUBLISHED_POST_IDS_QUERY } from "../src/queries";
 
@@ -34,8 +34,8 @@ function countWords(blocks: unknown[]): number {
 // Matches the language options of the Code Block in the CMS schema
 const LANGS = ["typescript", "javascript", "html", "css", "python", "bash", "json", "yaml", "go", "rust"];
 
-// Code blocks sit on an inverse surface, so the light site needs a dark theme and vice versa
-const THEMES = { ondark: "vitesse-dark", onlight: "vitesse-light" };
+// Token colours come from CSS variables (see .code-block in index.css), so one render serves both themes
+const THEME = createCssVariablesTheme({ name: "kobolt", variablePrefix: "--shiki-", fontStyle: true });
 
 type Highlighter = Awaited<ReturnType<typeof createHighlighter>>;
 
@@ -50,7 +50,7 @@ function highlightCode(blocks: unknown[], hl: Highlighter): unknown[] {
     if (_type !== "code" || !code) return block;
 
     const lang = language && LANGS.includes(language) ? language : "text";
-    const html = hl.codeToHtml(code, { lang, themes: THEMES, defaultColor: false });
+    const html = hl.codeToHtml(code, { lang, theme: THEME });
     // Keep only the inner <code> markup; the site renders its own <pre> wrapper
     const inner = html.match(/<code[^>]*>([\s\S]*)<\/code><\/pre>$/)?.[1];
     return inner ? { ...block, html: inner } : block;
@@ -84,7 +84,7 @@ export async function fetchPosts({ projectId, dataset = "production", previewTok
   });
 
   const posts: Post[] = previewToken ? await fetchPreview(client) : await client.fetch(POSTS_QUERY);
-  highlighter ??= createHighlighter({ themes: Object.values(THEMES), langs: LANGS });
+  highlighter ??= createHighlighter({ themes: [THEME], langs: LANGS });
   const hl = await highlighter;
 
   return posts.map((post) => ({
