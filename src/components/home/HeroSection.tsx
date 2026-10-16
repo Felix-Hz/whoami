@@ -4,7 +4,7 @@ import type { RoutableProps } from "preact-router";
 import { isoDate, PostIndex } from "@/components/blog/PostIndex";
 import { getAllPosts } from "@/data/posts";
 import type { DitherHandle } from "@/motion/dither";
-import { ditherGain, ditherLevel, onDitherLevel } from "@/motion/ditherLevel";
+import { ditherLevel, ditherParams, onDitherLevel } from "@/motion/ditherLevel";
 import { heroProgress, unwatchHero, watchHero } from "@/motion/heroProgress";
 import { AsciiPortrait } from "./AsciiPortrait";
 import { Chapter } from "./Chapter";
@@ -55,7 +55,7 @@ function useDither(hero: { current: HTMLElement | null }, canvas: { current: HTM
         quiet: [...el.querySelectorAll<HTMLElement>("#name, [data-margin] > p"), ...pageType()],
         portrait: el.querySelector<HTMLElement>("[data-portrait]"),
         progress: heroProgress,
-        gain: ditherGain(ditherLevel()),
+        knob: ditherParams(ditherLevel()),
       });
       booting = false;
       if (cancelled) {
@@ -74,7 +74,7 @@ function useDither(hero: { current: HTMLElement | null }, canvas: { current: HTM
         return;
       }
       handle.setEnabled(level > 0);
-      if (level > 0) handle.setGain(ditherGain(level));
+      if (level > 0) handle.setKnob(ditherParams(level));
     }
     const stopKnob = onDitherLevel(apply);
 

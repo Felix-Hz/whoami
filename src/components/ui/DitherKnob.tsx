@@ -10,7 +10,7 @@ import {
 } from "@/motion/ditherLevel";
 
 // An amp-style knob for the home page's dither: click to switch it on and off, press and drag to turn
-// it (sideways or up and down), arrows to step it. 0 is off, 5 is the designed density, 10 is the top.
+// it (sideways or up and down), arrows to step it. 0 is off, 1 is the designed field, 10 is the top.
 
 const SWEEP = 270; // degrees from 0 to 10, like an amp's 7 o'clock to 5 o'clock
 const PX_PER_STEP = 14;

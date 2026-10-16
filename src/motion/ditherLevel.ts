@@ -1,12 +1,13 @@
 import { prefersReducedMotion } from "./spring";
 
-// The dither knob's state, 0..10. 0 is off (the static dot grid), 5 is the designed density, 10 is about
-// four and a half times denser and spans the whole page. Remembered per browser; reduced motion starts off unless the reader turned it on.
+// The dither knob's state, 0..10. 0 is off (the static dot grid), 1 is the designed field (the default),
+// and every step up adds a visible amount of ink, to most of the page at 10. Remembered per browser; reduced motion starts off unless the reader turned it on.
 
 export const LEVEL_MIN = 0;
 export const LEVEL_MAX = 10;
-export const LEVEL_DEFAULT = 5;
-const KEY = "dither";
+export const LEVEL_DEFAULT = 1;
+// v2: level 1 became the designed field; older saved levels meant something else
+const KEY = "dither-v2";
 
 const listeners = new Set<(level: number) => void>();
 let level: number | null = null;
@@ -57,6 +58,17 @@ export function onDitherLevel(fn: (level: number) => void) {
   };
 }
 
-// Shader density multiplier: 1 at the default, about 4.6 at the top (where the field also spans the
-// full width, see the shader), a whisper at 1
-export const ditherGain = (l: number) => (l / LEVEL_DEFAULT) ** 2.2;
+// What each knob level means to the shader: [noise threshold, density, spread].
+// One curve from the designed field (level 1) to the top (level 10): the threshold falls so dots cover
+// more of the page, the density rises, and the field spreads right. Steps are placed along it so each
+// one roughly multiplies the inked area (measured: about 0.05% of the screen at 2 up to 4.7% at 10),
+// so no step is dead.
+export type KnobParams = [threshold: number, density: number, spread: number];
+
+const STEPS = [0, 0, 0.455, 0.53, 0.605, 0.66, 0.716, 0.77, 0.84, 0.92, 1];
+const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+
+export function ditherParams(l: number): KnobParams {
+  const s = STEPS[Math.min(LEVEL_MAX, Math.max(LEVEL_MIN, Math.round(l)))];
+  return [lerp(0.45, 0.12, s), lerp(0.22, 0.95, s ** 1.4), s];
+}
