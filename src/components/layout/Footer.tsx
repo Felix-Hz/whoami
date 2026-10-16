@@ -18,13 +18,13 @@ export function Footer() {
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => trackSocialClick(o.track)}
-            className="hover:text-accent"
+            className="hover:text-accent py-2.5 -my-2.5"
           >
             {o.label}
             <span aria-hidden="true"> ↗</span>
           </a>
         ))}
-        <a href="/rss.xml" className="hover:text-accent">
+        <a href="/rss.xml" className="hover:text-accent py-2.5 -my-2.5">
           rss
         </a>
       </nav>

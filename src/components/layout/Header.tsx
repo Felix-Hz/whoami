@@ -22,7 +22,7 @@ function Outbound() {
           target="_blank"
           rel="noopener noreferrer"
           onClick={() => trackSocialClick(o.track)}
-          className="text-ink-3 hover:text-accent"
+          className="text-ink-3 hover:text-accent py-2.5 -my-2.5"
         >
           {o.label}
           <span aria-hidden="true" className="ml-[0.15em]">
@@ -31,7 +31,7 @@ function Outbound() {
           <span className="sr-only"> (opens in a new tab)</span>
         </a>
       ))}
-      <a href="/rss.xml" className="text-ink-3 hover:text-accent">
+      <a href="/rss.xml" className="text-ink-3 hover:text-accent py-2.5 -my-2.5">
         rss
       </a>
     </>
@@ -62,7 +62,7 @@ export function Header() {
 
       {/* Phones: one quiet toggle; works without JS because it's a <details> */}
       <details ref={menu} className="md:hidden col-span-2 justify-self-end group">
-        <summary className="meta text-ink-2 list-none cursor-pointer select-none py-2 -my-2 [&::-webkit-details-marker]:hidden">
+        <summary className="meta text-ink-2 list-none cursor-pointer select-none py-3 -my-3 [&::-webkit-details-marker]:hidden">
           index <span className="font-pixel text-accent group-open:hidden">+</span>
           <span className="font-pixel text-accent hidden group-open:inline">−</span>
         </summary>
