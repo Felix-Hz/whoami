@@ -1,5 +1,6 @@
-import { useCallback, useRef } from "preact/hooks";
+import { useCallback, useRef, useState } from "preact/hooks";
 import Router, { type RouterOnChangeArgs } from "preact-router";
+import { authoringSlot } from "@/authoring-slot";
 import { BlogListPage } from "@/components/blog/BlogListPage";
 import { BlogPostPage } from "@/components/blog/BlogPostPage";
 import { HeroSection } from "@/components/home/HeroSection";
@@ -15,8 +16,10 @@ declare global {
 export function App() {
   const contentRef = useRef<HTMLDivElement>(null);
   const isFirstRender = useRef(true);
+  const [url, setUrl] = useState("");
 
   const handleRouteChange = useCallback((e: RouterOnChangeArgs) => {
+    setUrl(e.url);
     if (isFirstRender.current) {
       isFirstRender.current = false;
       return;
@@ -40,6 +43,7 @@ export function App() {
           <BlogPostPage path="/blog/:slug" />
         </Router>
       </div>
+      {authoringSlot.Toolbar && <authoringSlot.Toolbar url={url} />}
     </Layout>
   );
 }

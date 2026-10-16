@@ -1,5 +1,6 @@
 import { PortableText } from "@portabletext/react";
 import type { RoutableProps } from "preact-router";
+import { authoringSlot } from "@/authoring-slot";
 import { getPostBySlug } from "@/data/posts";
 import { useHead } from "@/hooks/useHead";
 import { trackBlogPostView } from "@/utils/analytics";
@@ -71,6 +72,7 @@ export function BlogPostPage({ slug }: BlogPostPageProps) {
             <time dateTime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
             <span aria-hidden="true">/</span>
             <span>{post.readingTime} min read</span>
+            {authoringSlot.Badge && <authoringSlot.Badge post={post} />}
           </div>
 
           <h1 className="text-3xl md:text-4xl lg:text-5xl text-text-primary tracking-[-0.04em] leading-[0.95]">

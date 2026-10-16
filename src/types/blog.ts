@@ -14,4 +14,6 @@ export type BlogPost = Omit<QueriedPost, "body" | "tags"> & {
   body: PostBodyBlock[];
   tags: string[];
   readingTime: number;
+  // Dev-only draft preview; never present in production content
+  previewStatus?: "draft" | "changed";
 };

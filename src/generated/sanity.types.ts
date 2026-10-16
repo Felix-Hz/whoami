@@ -226,8 +226,9 @@ export type AllSanitySchemaTypes =
 
 // Source: ../src/queries.ts
 // Variable: POSTS_QUERY
-// Query: *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && defined(publishedAt) && defined(excerpt)] | order(publishedAt desc) {  title,  "slug": slug.current,  excerpt,  body,  tags,  publishedAt,  "coverImage": mainImage.asset->url,  coverImageCredit}
+// Query: *[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && defined(publishedAt) && defined(excerpt)] | order(publishedAt desc) {  _id,  title,  "slug": slug.current,  excerpt,  body,  tags,  publishedAt,  "coverImage": mainImage.asset->url,  coverImageCredit}
 export type POSTS_QUERY_RESULT = Array<{
+  _id: string;
   title: string;
   slug: string;
   excerpt: string;
@@ -238,10 +239,33 @@ export type POSTS_QUERY_RESULT = Array<{
   coverImageCredit: string | null;
 }>;
 
+// Source: ../src/queries.ts
+// Variable: PREVIEW_POSTS_QUERY
+// Query: *[_type == "post" && defined(slug.current)] | order(coalesce(publishedAt, _createdAt) desc) {  _id,  _originalId,  "title": coalesce(title, "untitled"),  "slug": slug.current,  "excerpt": coalesce(excerpt, ""),  body,  tags,  "publishedAt": coalesce(publishedAt, _createdAt),  "coverImage": mainImage.asset->url,  coverImageCredit}
+export type PREVIEW_POSTS_QUERY_RESULT = Array<{
+  _id: string;
+  _originalId: null;
+  title: string;
+  slug: string;
+  excerpt: string;
+  body: BlockContent | null;
+  tags: Array<string> | null;
+  publishedAt: string;
+  coverImage: string | null;
+  coverImageCredit: string | null;
+}>;
+
+// Source: ../src/queries.ts
+// Variable: PUBLISHED_POST_IDS_QUERY
+// Query: *[_type == "post" && !(_id in path("drafts.**"))]._id
+export type PUBLISHED_POST_IDS_QUERY_RESULT = Array<string>;
+
 // Query TypeMap
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
-    '*[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && defined(publishedAt) && defined(excerpt)] | order(publishedAt desc) {\n  title,\n  "slug": slug.current,\n  excerpt,\n  body,\n  tags,\n  publishedAt,\n  "coverImage": mainImage.asset->url,\n  coverImageCredit\n}': POSTS_QUERY_RESULT;
+    '*[_type == "post" && !(_id in path("drafts.**")) && defined(slug.current) && defined(publishedAt) && defined(excerpt)] | order(publishedAt desc) {\n  _id,\n  title,\n  "slug": slug.current,\n  excerpt,\n  body,\n  tags,\n  publishedAt,\n  "coverImage": mainImage.asset->url,\n  coverImageCredit\n}': POSTS_QUERY_RESULT;
+    '*[_type == "post" && defined(slug.current)] | order(coalesce(publishedAt, _createdAt) desc) {\n  _id,\n  _originalId,\n  "title": coalesce(title, "untitled"),\n  "slug": slug.current,\n  "excerpt": coalesce(excerpt, ""),\n  body,\n  tags,\n  "publishedAt": coalesce(publishedAt, _createdAt),\n  "coverImage": mainImage.asset->url,\n  coverImageCredit\n}': PREVIEW_POSTS_QUERY_RESULT;
+    '*[_type == "post" && !(_id in path("drafts.**"))]._id': PUBLISHED_POST_IDS_QUERY_RESULT;
   }
 }

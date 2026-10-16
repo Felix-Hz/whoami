@@ -1,3 +1,4 @@
+import { authoringSlot } from "@/authoring-slot";
 import type { BlogPost } from "@/types/blog";
 
 function formatDate(iso: string): string {
@@ -16,6 +17,7 @@ export function BlogPostCard({ post, index }: { post: BlogPost; index: number })
           <time dateTime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
           <span aria-hidden="true">/</span>
           <span>{post.readingTime} min read</span>
+          {authoringSlot.Badge && <authoringSlot.Badge post={post} />}
         </div>
 
         <h2 className="font-[var(--font-heading)] text-xl md:text-2xl text-text-primary group-hover:text-accent transition-colors duration-normal inline-flex items-baseline gap-2">
