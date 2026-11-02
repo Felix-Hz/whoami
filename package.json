@@ -20,25 +20,25 @@
   },
   "dependencies": {
     "@portabletext/react": "^6.2.0",
-    "@sanity/client": "^8.9.0",
+    "@sanity/client": "^8.14.1",
     "@tailwindcss/vite": "^4.3.3",
-    "preact": "^11.0.1",
+    "preact": "^11.1.1",
     "preact-router": "^4.1.2",
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.5.15",
+    "@biomejs/biome": "2.6.4",
     "@preact/preset-vite": "^2.10.6",
     "@resvg/resvg-js": "2.6.2",
-    "@sanity/types": "^6.19.0",
-    "@types/node": "^26.6.5",
+    "@sanity/types": "^6.21.0",
+    "@types/node": "^26.6.6",
     "concurrently": "^10.0.6",
-    "groq": "^6.19.0",
-    "preact-render-to-string": "^6.8.1",
-    "satori": "0.62.0",
+    "groq": "^6.21.0",
+    "preact-render-to-string": "^6.8.2",
+    "satori": "0.63.2",
     "shiki": "^4.5.0",
     "tsx": "^4.23.15",
     "typescript": "~6.0.3",
-    "vite": "^8.3.4"
+    "vite": "^8.3.5"
   }
 }
