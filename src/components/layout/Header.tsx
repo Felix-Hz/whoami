@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import { DitherKnob } from "@/components/ui/DitherKnob";
 import { Logo } from "@/components/ui/Logo";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
-import { trackSocialClick } from "@/utils/analytics";
 import { CHAPTERS, OUTBOUND } from "./links";
 
 function Chapters({ onNavigate, active }: { onNavigate?: () => void; active?: string | null }) {
@@ -67,7 +66,7 @@ function Outbound() {
           href={o.href}
           target="_blank"
           rel="noopener noreferrer"
-          onClick={() => trackSocialClick(o.track)}
+          data-event={o.event}
           className="text-ink-3 hover:text-accent py-2.5 -my-2.5"
         >
           {o.label}
