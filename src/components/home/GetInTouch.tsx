@@ -1,5 +1,4 @@
 import { EMAIL } from "@/components/layout/links";
-import { trackSocialClick } from "@/utils/analytics";
 
 // The closing letter: the last thing on the home page, and the only call to action on it
 export function GetInTouch() {
@@ -9,7 +8,7 @@ export function GetInTouch() {
         if any of this was useful, or wrong, write to{" "}
         <a
           href={`mailto:${EMAIL}`}
-          onClick={() => trackSocialClick("email")}
+          data-event="contact:email"
           className="text-accent underline decoration-1 underline-offset-[0.14em] hover:decoration-2 whitespace-nowrap"
         >
           {EMAIL}

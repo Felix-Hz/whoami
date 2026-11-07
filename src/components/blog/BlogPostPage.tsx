@@ -4,7 +4,6 @@ import type { RoutableProps } from "preact-router";
 import { authoringSlot } from "@/authoring-slot";
 import { getPostBySlug } from "@/data/posts";
 import { useHead } from "@/hooks/useHead";
-import { trackBlogPostView } from "@/utils/analytics";
 import { isoDate } from "./BlogPostCard";
 import { createPortableTextComponents, Marks } from "./PortableTextComponents";
 import { ShareLinks } from "./ShareLinks";
@@ -52,7 +51,6 @@ export function BlogPostPage({ slug }: BlogPostPageProps) {
   }
 
   const postUrl = `https://felix-hzv.dev/blog/${post.slug}`;
-  trackBlogPostView(post.slug, post.title);
 
   return (
     <article>
@@ -113,7 +111,7 @@ export function BlogPostPage({ slug }: BlogPostPageProps) {
       <footer className="page-grid pt-12 pb-chapter">
         <div className="col-text flex flex-col gap-10">
           <Marks />
-          <ShareLinks title={post.title} slug={post.slug} url={postUrl} />
+          <ShareLinks title={post.title} url={postUrl} />
           <p>
             <BackLink />
           </p>

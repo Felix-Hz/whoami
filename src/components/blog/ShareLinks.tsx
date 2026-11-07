@@ -1,20 +1,17 @@
 import { useState } from "preact/hooks";
-import { trackShareClick } from "@/utils/analytics";
 
 interface ShareLinksProps {
   title: string;
-  slug: string;
   url: string;
 }
 
-export function ShareLinks({ title, slug, url }: ShareLinksProps) {
+export function ShareLinks({ title, url }: ShareLinksProps) {
   const [copied, setCopied] = useState(false);
 
   const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`;
   const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
 
   function copyToClipboard() {
-    trackShareClick("copy_link", slug);
     navigator.clipboard
       .writeText(url)
       .then(() => {
@@ -34,7 +31,7 @@ export function ShareLinks({ title, slug, url }: ShareLinksProps) {
         target="_blank"
         rel="noopener noreferrer"
         className="text-ink hover:text-accent"
-        onClick={() => trackShareClick("x", slug)}
+        data-event="share:x"
       >
         x<span aria-hidden="true"> ↗</span>
       </a>
@@ -43,11 +40,16 @@ export function ShareLinks({ title, slug, url }: ShareLinksProps) {
         target="_blank"
         rel="noopener noreferrer"
         className="text-ink hover:text-accent"
-        onClick={() => trackShareClick("linkedin", slug)}
+        data-event="share:linkedin"
       >
         linkedin<span aria-hidden="true"> ↗</span>
       </a>
-      <button type="button" onClick={copyToClipboard} className="text-ink hover:text-accent cursor-pointer">
+      <button
+        type="button"
+        onClick={copyToClipboard}
+        data-event="share:copy"
+        className="text-ink hover:text-accent cursor-pointer"
+      >
         {copied ? "copied" : "copy link"}
       </button>
       <span className="sr-only" aria-live="polite">

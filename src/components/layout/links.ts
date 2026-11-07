@@ -7,8 +7,8 @@ export const CHAPTERS = [
 ] as const;
 
 export const OUTBOUND = [
-  { label: "github", href: "https://github.com/Felix-Hz", track: "github" },
-  { label: "linkedin", href: "https://www.linkedin.com/in/felix-hernandez-vieyra/", track: "linkedin" },
+  { label: "github", href: "https://github.com/Felix-Hz", event: "social:github" },
+  { label: "linkedin", href: "https://www.linkedin.com/in/felix-hernandez-vieyra/", event: "social:linkedin" },
 ] as const;
 
 export const EMAIL = "me@felix-hzv.dev";

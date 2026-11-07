@@ -1,4 +1,3 @@
-import { trackSocialClick } from "@/utils/analytics";
 import { OUTBOUND } from "./links";
 
 export function Footer() {
@@ -17,7 +16,7 @@ export function Footer() {
             href={o.href}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={() => trackSocialClick(o.track)}
+            data-event={o.event}
             className="hover:text-accent py-2.5 -my-2.5"
           >
             {o.label}
