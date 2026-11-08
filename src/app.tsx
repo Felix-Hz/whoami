@@ -5,13 +5,6 @@ import { BlogListPage } from "@/components/blog/BlogListPage";
 import { BlogPostPage } from "@/components/blog/BlogPostPage";
 import { HeroSection } from "@/components/home/HeroSection";
 import { Layout } from "@/components/layout/Layout";
-import { trackPageView } from "@/utils/analytics";
-
-declare global {
-  interface Window {
-    gtag?: (...args: unknown[]) => void;
-  }
-}
 
 export function App() {
   const contentRef = useRef<HTMLDivElement>(null);
@@ -30,7 +23,6 @@ export function App() {
       return;
     }
     window.scrollTo(0, 0);
-    trackPageView(e.url);
     const el = contentRef.current;
     if (el) {
       el.classList.remove("route-enter");
