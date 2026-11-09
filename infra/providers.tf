@@ -16,6 +16,14 @@ terraform {
 
 provider "aws" {
   region = "ap-southeast-2" // Sydney
+
+  # Cost allocation tags, activated in the organisation's billing
+  default_tags {
+    tags = {
+      Application = "PERSONAL_WEBSITE"
+      Environment = "production"
+    }
+  }
 }
 
 # Reads CLOUDFLARE_API_TOKEN from the environment

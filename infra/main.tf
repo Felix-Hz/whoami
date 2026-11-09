@@ -11,11 +11,6 @@ terraform {
 resource "aws_s3_bucket" "whoami_build" {
   bucket        = "felix-hzv.dev"
   force_destroy = true
-
-  tags = {
-    Application = "PERSONAL_WEBSITE"
-    Environment = "production"
-  }
 }
 
 resource "aws_s3_bucket_versioning" "versioning" {
@@ -82,11 +77,6 @@ resource "aws_cloudfront_function" "rewrite_uri" {
 resource "aws_cloudfront_distribution" "cdn" {
 
   aliases = ["felix-hzv.dev", "www.felix-hzv.dev"]
-
-  tags = {
-    Application = "PERSONAL_WEBSITE"
-    Environment = "production"
-  }
 
   origin {
     domain_name = aws_s3_bucket.whoami_build.bucket_regional_domain_name
