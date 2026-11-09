@@ -40,67 +40,6 @@ resource "aws_s3_bucket_public_access_block" "block" {
 /* / /__/ / _ \/ // / _  / _// __/ _ \/ _ \/ __/ */
 /* \___/_/\___/\_,_/\_,_/_/ /_/  \___/_//_/\__/  */
 
-# Route 53 zone
-resource "aws_route53_zone" "main" {
-  name = "felix-hzv.dev"
-
-  tags = {
-    Application = "PERSONAL_WEBSITE"
-    Environment = "production"
-  }
-}
-
-# DNS records 
-resource "aws_route53_record" "apex" {
-  zone_id = aws_route53_zone.main.zone_id
-  name    = "felix-hzv.dev"
-  type    = "A"
-
-  alias {
-    name                   = aws_cloudfront_distribution.cdn.domain_name
-    zone_id                = aws_cloudfront_distribution.cdn.hosted_zone_id
-    evaluate_target_health = false
-  }
-}
-
-resource "aws_route53_record" "www" {
-  zone_id = aws_route53_zone.main.zone_id
-  name    = "www.felix-hzv.dev"
-  type    = "A"
-
-  alias {
-    name                   = aws_cloudfront_distribution.cdn.domain_name
-    zone_id                = aws_cloudfront_distribution.cdn.hosted_zone_id
-    evaluate_target_health = false
-  }
-}
-
-/*   __  ___     _ __  */
-/*  /  |/  /__ _(_) /  */
-/* / /|_/ / _ `/ / /   */
-/* /_/  /_/\_,_/_/_/    */
-
-resource "aws_route53_record" "mx" {
-  zone_id = aws_route53_zone.main.zone_id
-  name    = "felix-hzv.dev"
-  type    = "MX"
-  ttl     = 300
-  records = [
-    "10 mx1.privateemail.com",
-    "10 mx2.privateemail.com"
-  ]
-}
-
-resource "aws_route53_record" "spf" {
-  zone_id = aws_route53_zone.main.zone_id
-  name    = "felix-hzv.dev"
-  type    = "TXT"
-  ttl     = 300
-  records = [
-    "v=spf1 include:spf.privateemail.com ~all"
-  ]
-}
-
 resource "aws_cloudfront_origin_access_identity" "origin_access_identity" {
   comment = "OAI for CloudFront to access S3"
 }
