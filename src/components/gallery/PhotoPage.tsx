@@ -18,6 +18,8 @@ const plate = (n: number) => String(n + 1).padStart(2, "0");
 function keyHandler(onPrev: () => void, onNext: () => void) {
   return (e: KeyboardEvent) => {
     if (e.metaKey || e.ctrlKey || e.altKey || e.defaultPrevented) return;
+    // While the inspect view is open, Escape closes it (the dialog's own cancel) and nothing navigates
+    if (document.querySelector("dialog[open]")) return;
     const t = e.target as HTMLElement | null;
     if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
     if (e.key === "ArrowLeft") onPrev();
@@ -58,8 +60,7 @@ function Detail({ label, value }: { label: string; value?: string | null }) {
   );
 }
 
-// Pointer and touch affordance beside the image. Keyboard users have the arrow keys and the caption's
-// prev/next links, so these stay out of the tab order.
+// The only prev/next links on the page, beside the image; the arrow keys and swipes do the same.
 function StageArrow({ photo, dir }: { photo?: Photo; dir: "prev" | "next" }) {
   const glyph = dir === "prev" ? "←" : "→";
   if (!photo) {
@@ -72,32 +73,11 @@ function StageArrow({ photo, dir }: { photo?: Photo; dir: "prev" | "next" }) {
   }
   const href = `/gallery/${photo.slug}`;
   return (
-    <a href={href} onClick={(e) => navigate(href, e)} className="stage-arrow" data-dir={dir} tabIndex={-1}>
+    <a href={href} onClick={(e) => navigate(href, e)} className="stage-arrow" data-dir={dir} rel={dir}>
       <span aria-hidden="true">{glyph}</span>
       <span className="sr-only">
         {dir === "prev" ? "previous" : "next"}: {photo.title}
       </span>
-    </a>
-  );
-}
-
-function Step({ photo, rel, children }: { photo?: Photo; rel: "prev" | "next"; children: string }) {
-  if (!photo)
-    return (
-      <span className="text-rule" aria-hidden="true">
-        {children}
-      </span>
-    );
-  const href = `/gallery/${photo.slug}`;
-  return (
-    <a
-      href={href}
-      rel={rel}
-      onClick={(e) => navigate(href, e)}
-      className="text-ink-2 hover:text-accent py-2.5 -my-2.5"
-      aria-label={`${rel === "prev" ? "previous" : "next"}: ${photo.title}`}
-    >
-      {children}
     </a>
   );
 }
@@ -109,6 +89,7 @@ export function PhotoPage({ slug }: PhotoPageProps) {
   const prev = index > 0 ? photos[index - 1] : undefined;
   const next = index >= 0 ? photos[index + 1] : undefined;
   const stage = useRef<HTMLDivElement>(null);
+  const inspect = useRef<HTMLDialogElement>(null);
 
   useHead({
     title: photo ? `${photo.title} | felix hernandez vieyra` : "photo not found",
@@ -172,10 +153,26 @@ export function PhotoPage({ slug }: PhotoPageProps) {
       <div ref={stage} className="photo-stage px-gutter pt-2 md:pt-4" onContextMenu={guardImages}>
         <StageArrow photo={prev} dir="prev" />
         <div className="photo-frame" style={{ "--aspect": aspect(photo), backgroundColor: photo.color }}>
-          <Picture photo={photo} sizes={STAGE_SIZES} eager named />
+          <button type="button" className="photo-inspect-open" onClick={() => inspect.current?.showModal()}>
+            <Picture photo={photo} sizes={STAGE_SIZES} eager named />
+            <span className="sr-only">inspect {photo.title}</span>
+          </button>
         </div>
         <StageArrow photo={next} dir="next" />
       </div>
+
+      {/* The photo alone over the blurred page. Any click or tap closes it, as does Escape. The image is
+          lazy, so the full-width file is fetched only when the view first opens. */}
+      {/* biome-ignore lint/a11y/useKeyWithClickEvents: Escape closes a modal dialog natively */}
+      <dialog
+        ref={inspect}
+        className="photo-inspect"
+        aria-label={photo.title}
+        onClick={() => inspect.current?.close()}
+        onContextMenu={guardImages}
+      >
+        <Picture photo={photo} sizes="100vw" />
+      </dialog>
 
       <header className="page-grid pt-6 md:pt-8 pb-chapter">
         <nav
@@ -185,14 +182,6 @@ export function PhotoPage({ slug }: PhotoPageProps) {
           <p>
             <span className="font-pixel text-accent">{plate(index)}</span>
             <span className="text-ink-3"> / {plate(photos.length - 1)}</span>
-          </p>
-          <p className="flex gap-6">
-            <Step photo={prev} rel="prev">
-              ← prev
-            </Step>
-            <Step photo={next} rel="next">
-              next →
-            </Step>
           </p>
           <p>
             <a href="/gallery" onClick={(e) => navigate("/gallery", e)} className="text-ink-2 hover:text-accent">

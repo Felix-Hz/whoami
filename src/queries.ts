@@ -32,9 +32,10 @@ export const PREVIEW_POSTS_QUERY =
 
 // Gallery order: sortOrder ascending. Studio validates it as unique, but a duplicate or a missing number
 // must not break the page, so ties fall back to newest first, then _id, and unnumbered photos go last.
-// Only photos whose files the upload script finished; the image id is the S3 prefix.
+// Only photos whose files the upload script finished; the image id is the S3 prefix. `display != false`
+// keeps documents without the field, so only an explicit switch-off hides a photo.
 export const PHOTOS_QUERY =
-  defineQuery(`*[_type == "photo" && !(_id in path("drafts.**")) && defined(slug.current) && defined(imageId) && defined(title)] | order(coalesce(sortOrder, 1e9) asc, _createdAt desc, _id asc) {
+  defineQuery(`*[_type == "photo" && !(_id in path("drafts.**")) && defined(slug.current) && defined(imageId) && defined(title) && display != false] | order(coalesce(sortOrder, 1e9) asc, _createdAt desc, _id asc) {
   _id,
   title,
   sortOrder,

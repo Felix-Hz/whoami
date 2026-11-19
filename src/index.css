@@ -736,6 +736,16 @@ a {
   user-select: none;
 }
 
+/* The inspect view sizes its image to the screen instead of the frame (see .photo-inspect below) */
+.photo-inspect .photo-img {
+  width: auto;
+  height: auto;
+  max-width: calc(100vw - 2 * var(--inspect-pad));
+  max-height: calc(100dvh - 2 * var(--inspect-pad));
+  object-fit: contain;
+  box-shadow: 0 1.5rem 4rem rgb(0 0 0 / 0.35);
+}
+
 .gallery-item .photo-img {
   transition: opacity 240ms var(--ease-out);
 }
@@ -835,5 +845,74 @@ a {
   ::view-transition-group(*) {
     animation-duration: 460ms;
     animation-timing-function: var(--ease-out);
+  }
+}
+
+/* Inspect: the photo alone, as large as the screen allows, over the page blurred behind it */
+.photo-inspect-open {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
+}
+
+.photo-inspect {
+  --inspect-pad: clamp(0.75rem, 3vw, 2.5rem);
+  display: none;
+  place-items: center;
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: var(--inspect-pad);
+  border: 0;
+  overflow: hidden;
+  background: transparent;
+  cursor: zoom-out;
+}
+
+.photo-inspect[open] {
+  display: grid;
+}
+
+.photo-inspect picture {
+  display: contents;
+}
+
+/* Older engines do not inherit custom properties into ::backdrop; the fallback is the paper colour */
+.photo-inspect::backdrop {
+  background: color-mix(in srgb, var(--color-paper, #fafaf8) 55%, transparent);
+  -webkit-backdrop-filter: blur(20px) saturate(0.85);
+  backdrop-filter: blur(20px) saturate(0.85);
+}
+
+:root:has(.photo-inspect[open]) {
+  overflow: hidden;
+}
+
+@keyframes inspect-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+@keyframes backdrop-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .photo-inspect[open] .photo-img {
+    animation: inspect-in 320ms var(--ease-out);
+  }
+
+  .photo-inspect[open]::backdrop {
+    animation: backdrop-in 320ms var(--ease-out);
   }
 }
