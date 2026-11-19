@@ -5,8 +5,11 @@ import { h } from "preact";
 import renderToString from "preact-render-to-string";
 import { BlogListPage } from "../src/components/blog/BlogListPage";
 import { BlogPostPage } from "../src/components/blog/BlogPostPage";
+import { GalleryPage } from "../src/components/gallery/GalleryPage";
+import { PhotoPage } from "../src/components/gallery/PhotoPage";
 import { HeroSection } from "../src/components/home/HeroSection";
 import { Layout } from "../src/components/layout/Layout";
+import { getAllPhotos } from "../src/data/photos";
 import { getAllPosts } from "../src/data/posts";
 import { flushHead, type HeadMeta } from "../src/head";
 import { rss, sitemap } from "./feeds";
@@ -36,12 +39,20 @@ function page(content: ReturnType<typeof h>, home = false) {
 const routes: Route[] = [
   { path: "/", element: page(h(HeroSection, null), true) },
   { path: "/blog", element: page(h(BlogListPage, null)) },
+  { path: "/gallery", element: page(h(GalleryPage, null)) },
 ];
 
 for (const post of getAllPosts()) {
   routes.push({
     path: `/blog/${post.slug}`,
     element: page(h(BlogPostPage, { slug: post.slug })),
+  });
+}
+
+for (const photo of getAllPhotos()) {
+  routes.push({
+    path: `/gallery/${photo.slug}`,
+    element: page(h(PhotoPage, { slug: photo.slug })),
   });
 }
 
@@ -115,7 +126,7 @@ for (const route of routes) {
 // Feeds and share images, from the same posts the pages were built from
 const posts = getAllPosts();
 writeFileSync(resolve(distDir, "rss.xml"), rss(posts));
-writeFileSync(resolve(distDir, "sitemap.xml"), sitemap(posts));
+writeFileSync(resolve(distDir, "sitemap.xml"), sitemap(posts, getAllPhotos()));
 mkdirSync(resolve(distDir, "og"), { recursive: true });
 writeFileSync(resolve(distDir, "og/home.png"), await homeImage());
 for (const post of posts) writeFileSync(resolve(distDir, `og/${post.slug}.png`), await postImage(post));

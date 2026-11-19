@@ -36,6 +36,8 @@ terraform.tfstate.backup
 # Local-only notes on the env vars
 .env.example
 src/generated/*.json
+# Local gallery preview from scripts/photos.py --out public
+public/img/
 # Studio
 studio/.env
 studio/dist

@@ -3,6 +3,8 @@ import Router, { type RouterOnChangeArgs } from "preact-router";
 import { authoringSlot } from "@/authoring-slot";
 import { BlogListPage } from "@/components/blog/BlogListPage";
 import { BlogPostPage } from "@/components/blog/BlogPostPage";
+import { GalleryPage } from "@/components/gallery/GalleryPage";
+import { PhotoPage } from "@/components/gallery/PhotoPage";
 import { HeroSection } from "@/components/home/HeroSection";
 import { Layout } from "@/components/layout/Layout";
 
@@ -38,6 +40,8 @@ export function App() {
           <HeroSection path="/" />
           <BlogListPage path="/blog" />
           <BlogPostPage path="/blog/:slug" />
+          <GalleryPage path="/gallery" />
+          <PhotoPage path="/gallery/:slug" />
         </Router>
       </div>
       {authoringSlot.Toolbar && <authoringSlot.Toolbar url={url} />}

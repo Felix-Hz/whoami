@@ -2,6 +2,7 @@ import { PortableText } from "@portabletext/react";
 import { h } from "preact";
 import renderToString from "preact-render-to-string";
 import { createPortableTextComponents } from "../src/components/blog/PortableTextComponents";
+import type { Photo } from "../src/data/photos";
 import type { BlogPost } from "../src/types/blog";
 
 // RSS and sitemap, built from posts.json. Dates come from publishedAt only, never Sanity's _updatedAt,
@@ -63,12 +64,15 @@ ${items}
 `;
 }
 
-export function sitemap(posts: BlogPost[]): string {
+export function sitemap(posts: BlogPost[], photos: Photo[] = []): string {
   const latest = posts[0]?.publishedAt.slice(0, 10);
   const urls = [
     { loc: `${SITE}/`, lastmod: latest },
     { loc: `${SITE}/blog`, lastmod: latest },
     ...posts.map((post) => ({ loc: `${SITE}/blog/${post.slug}`, lastmod: post.publishedAt.slice(0, 10) })),
+    // Photos carry no date of their own on the site
+    ...(photos.length ? [{ loc: `${SITE}/gallery`, lastmod: undefined }] : []),
+    ...photos.map((photo) => ({ loc: `${SITE}/gallery/${photo.slug}`, lastmod: undefined })),
   ];
   const entries = urls
     .map(
