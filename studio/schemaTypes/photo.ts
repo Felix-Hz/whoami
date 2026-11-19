@@ -25,6 +25,13 @@ export default defineType({
       validation: (rule) => rule.required(),
     }),
     defineField({
+      name: 'display',
+      title: 'Show in gallery',
+      type: 'boolean',
+      description: 'Off hides the photo from the site on the next rebuild; its files and details stay.',
+      initialValue: true,
+    }),
+    defineField({
       name: 'sortOrder',
       title: 'Sort order',
       type: 'number',
@@ -114,9 +121,10 @@ export default defineType({
     {title: 'Newest', name: 'createdDesc', by: [{field: '_createdAt', direction: 'desc'}]},
   ],
   preview: {
-    select: {title: 'title', sortOrder: 'sortOrder', location: 'location'},
-    prepare({title, sortOrder, location}) {
-      return {title, subtitle: `${sortOrder ?? '-'} · ${location || 'unknown'}`}
+    select: {title: 'title', sortOrder: 'sortOrder', location: 'location', display: 'display'},
+    prepare({title, sortOrder, location, display}) {
+      const hidden = display === false ? 'hidden · ' : ''
+      return {title, subtitle: `${hidden}${sortOrder ?? '-'} · ${location || 'unknown'}`}
     },
   },
 })

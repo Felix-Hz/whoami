@@ -327,6 +327,7 @@ def cmd_publish(csv_path: Path, out: Path | None, profile: str | None) -> None:
             "title": row["title"],
             "slug": {"_type": "slug", "current": slug},
             "sortOrder": n,
+            "display": True,
             "location": row["location"] or None,
             "author": AUTHOR,
             "camera": row["camera"] or None,

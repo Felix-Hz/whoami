@@ -75,6 +75,7 @@ export type Photo = {
   _rev: string;
   title: string;
   slug: Slug;
+  display?: boolean;
   sortOrder: number;
   location?: string;
   author: string;
@@ -279,7 +280,7 @@ export type PREVIEW_POSTS_QUERY_RESULT = Array<{
 
 // Source: ../src/queries.ts
 // Variable: PHOTOS_QUERY
-// Query: *[_type == "photo" && !(_id in path("drafts.**")) && defined(slug.current) && defined(imageId) && defined(title)] | order(coalesce(sortOrder, 1e9) asc, _createdAt desc, _id asc) {  _id,  title,  sortOrder,  "slug": slug.current,  location,  author,  camera,  lens,  exposure,  imageId,  width,  height,  edges,  color}
+// Query: *[_type == "photo" && !(_id in path("drafts.**")) && defined(slug.current) && defined(imageId) && defined(title) && display != false] | order(coalesce(sortOrder, 1e9) asc, _createdAt desc, _id asc) {  _id,  title,  sortOrder,  "slug": slug.current,  location,  author,  camera,  lens,  exposure,  imageId,  width,  height,  edges,  color}
 export type PHOTOS_QUERY_RESULT = Array<{
   _id: string;
   title: string;
