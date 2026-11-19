@@ -4,6 +4,7 @@ export const CHAPTERS = [
   { n: "01", label: "who", href: "/#who", section: "who" },
   { n: "02", label: "build", href: "/#build", section: "build" },
   { n: "03", label: "writing", href: "/blog", section: "writing" },
+  { n: "04", label: "gallery", href: "/gallery", section: "gallery" },
 ] as const;
 
 export const OUTBOUND = [

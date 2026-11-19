@@ -87,8 +87,15 @@ resource "aws_cloudfront_distribution" "cdn" {
     }
   }
 
+  origin {
+    domain_name              = aws_s3_bucket.photos.bucket_regional_domain_name
+    origin_id                = "s3-photos-origin"
+    origin_access_control_id = aws_cloudfront_origin_access_control.photos.id
+  }
+
   enabled             = true
   is_ipv6_enabled     = true
+  http_version        = "http2and3"
   default_root_object = "index.html"
   price_class         = "PriceClass_200" // Mid tier: Asia, Australia Europe, US, Canada
 
@@ -116,6 +123,18 @@ resource "aws_cloudfront_distribution" "cdn" {
       event_type   = "viewer-request"
       function_arn = aws_cloudfront_function.rewrite_uri.arn
     }
+  }
+
+  # Gallery images: random, never-reused keys uploaded with an immutable Cache-Control. No viewer
+  # function, since the index.html rewrite is for pages. AVIF and JPEG gain nothing from compression.
+  ordered_cache_behavior {
+    path_pattern           = "/img/*"
+    target_origin_id       = "s3-photos-origin"
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
+    cache_policy_id        = data.aws_cloudfront_cache_policy.caching_optimized.id
+    compress               = false
+    viewer_protocol_policy = "redirect-to-https"
   }
 
   # SPA fallback: serve index.html for unknown paths so client-side router handles them

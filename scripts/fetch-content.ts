@@ -5,11 +5,12 @@ import { fileURLToPath } from "node:url";
 import { createClient } from "@sanity/client";
 import { createCssVariablesTheme, createHighlighter } from "shiki";
 import type {
+  PHOTOS_QUERY_RESULT,
   POSTS_QUERY_RESULT,
   PREVIEW_POSTS_QUERY_RESULT,
   PUBLISHED_POST_IDS_QUERY_RESULT,
 } from "../src/generated/sanity.types";
-import { POSTS_QUERY, PREVIEW_POSTS_QUERY, PUBLISHED_POST_IDS_QUERY } from "../src/queries";
+import { PHOTOS_QUERY, POSTS_QUERY, PREVIEW_POSTS_QUERY, PUBLISHED_POST_IDS_QUERY } from "../src/queries";
 
 export interface FetchOptions {
   projectId: string;
@@ -101,11 +102,24 @@ export async function fetchPosts({ projectId, dataset = "production", previewTok
   }));
 }
 
+// Photos are published by scripts/photos.py, never as drafts, so preview and production read the same set
+export async function fetchPhotos({ projectId, dataset = "production" }: FetchOptions) {
+  const client = createClient({ projectId, dataset, useCdn: false, apiVersion: "2025-02-06" });
+  return client.fetch<PHOTOS_QUERY_RESULT>(PHOTOS_QUERY);
+}
+
 export const POSTS_PATH = resolve(dirname(fileURLToPath(import.meta.url)), "../src/generated/posts.json");
+
+export const PHOTOS_PATH = resolve(dirname(POSTS_PATH), "photos.json");
 
 export function writePosts(posts: unknown[]): void {
   mkdirSync(dirname(POSTS_PATH), { recursive: true });
   writeFileSync(POSTS_PATH, JSON.stringify(posts, null, 2));
+}
+
+export function writePhotos(photos: unknown[]): void {
+  mkdirSync(dirname(PHOTOS_PATH), { recursive: true });
+  writeFileSync(PHOTOS_PATH, JSON.stringify(photos));
 }
 
 async function main() {
@@ -120,9 +134,14 @@ async function main() {
   const previewToken = preview ? process.env.SANITY_PREVIEW_TOKEN || undefined : undefined;
 
   console.log(`Fetching blog posts from Sanity${previewToken ? " (drafts preview)" : ""}...`);
-  const posts = await fetchPosts({ projectId, dataset: process.env.SANITY_DATASET, previewToken });
+  const [posts, photos] = await Promise.all([
+    fetchPosts({ projectId, dataset: process.env.SANITY_DATASET, previewToken }),
+    fetchPhotos({ projectId, dataset: process.env.SANITY_DATASET }),
+  ]);
   writePosts(posts);
+  writePhotos(photos);
   console.log(`Fetched ${posts.length} posts → ${POSTS_PATH}`);
+  console.log(`Fetched ${photos.length} photos → ${PHOTOS_PATH}`);
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

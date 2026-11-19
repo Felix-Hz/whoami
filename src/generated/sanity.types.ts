@@ -67,6 +67,33 @@ export type BlockContent = Array<
     }
 >;
 
+export type Photo = {
+  _id: string;
+  _type: "photo";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title: string;
+  slug: Slug;
+  sortOrder: number;
+  location?: string;
+  author: string;
+  camera?: string;
+  lens?: string;
+  exposure?: string;
+  imageId: string;
+  width: number;
+  height: number;
+  edges: Array<number>;
+  color: string;
+};
+
+export type Slug = {
+  _type: "slug";
+  current: string;
+  source?: string;
+};
+
 export type Post = {
   _id: string;
   _type: "post";
@@ -103,12 +130,6 @@ export type SanityImageHotspot = {
   y: number;
   height: number;
   width: number;
-};
-
-export type Slug = {
-  _type: "slug";
-  current: string;
-  source?: string;
 };
 
 export type SanityImagePaletteSwatch = {
@@ -211,10 +232,11 @@ export type Geopoint = {
 export type AllSanitySchemaTypes =
   | SanityImageAssetReference
   | BlockContent
+  | Photo
+  | Slug
   | Post
   | SanityImageCrop
   | SanityImageHotspot
-  | Slug
   | SanityImagePaletteSwatch
   | SanityImagePalette
   | SanityImageDimensions
@@ -253,6 +275,26 @@ export type PREVIEW_POSTS_QUERY_RESULT = Array<{
   publishedAt: string;
   coverImage: string | null;
   coverImageCredit: string | null;
+}>;
+
+// Source: ../src/queries.ts
+// Variable: PHOTOS_QUERY
+// Query: *[_type == "photo" && !(_id in path("drafts.**")) && defined(slug.current) && defined(imageId) && defined(title)] | order(coalesce(sortOrder, 1e9) asc, _createdAt desc, _id asc) {  _id,  title,  sortOrder,  "slug": slug.current,  location,  author,  camera,  lens,  exposure,  imageId,  width,  height,  edges,  color}
+export type PHOTOS_QUERY_RESULT = Array<{
+  _id: string;
+  title: string;
+  sortOrder: number;
+  slug: string;
+  location: string | null;
+  author: string;
+  camera: string | null;
+  lens: string | null;
+  exposure: string | null;
+  imageId: string;
+  width: number;
+  height: number;
+  edges: Array<number>;
+  color: string;
 }>;
 
 // Source: ../src/queries.ts

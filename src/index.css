@@ -634,3 +634,206 @@ a {
     transition: none;
   }
 }
+
+/* ------------------------------------------------------------------ */
+/* Gallery: plates on the page grid, then one photograph per page     */
+/* ------------------------------------------------------------------ */
+
+.gallery {
+  row-gap: var(--spacing-chapter);
+}
+
+/* min-width: 0 stops a grid item growing to its image's intrinsic width (the width attribute) */
+.spread {
+  grid-column: 1 / -1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-chapter);
+}
+
+/* No plate is taller than the screen: its width is capped by the height it would take */
+.gallery-item {
+  width: 100%;
+  min-width: 0;
+  max-width: calc(85svh * var(--aspect));
+}
+
+.spread-full,
+.spread-inset-right {
+  align-items: center;
+}
+
+/* On phones the lead plate runs to the edges of the screen, like a full-bleed page in print */
+@media (width < 48rem) {
+  .spread-full {
+    margin-inline: calc(var(--spacing-gutter) * -1);
+  }
+
+  .spread-full figcaption {
+    padding-inline: var(--spacing-gutter);
+  }
+}
+
+@media (width >= 48rem) {
+  /* Each item grows by its aspect ratio from a zero basis, so the pair shares one height */
+  .spread-pair {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: clamp(0.75rem, 0.4rem + 1.4vw, 1.75rem);
+  }
+
+  .spread-pair > .gallery-item {
+    flex: var(--aspect) 1 0%;
+    min-width: 0;
+  }
+
+  .spread-inset-right {
+    grid-column: 3 / -1;
+    align-items: flex-end;
+  }
+
+  .spread-inset-left {
+    grid-column: 1 / 7;
+  }
+}
+
+@media (width >= 64rem) {
+  .spread-pair {
+    grid-column: 2 / 12;
+  }
+
+  .spread-inset-right {
+    grid-column: 5 / 13;
+  }
+
+  .spread-inset-left {
+    grid-column: 1 / 9;
+  }
+}
+
+/* The average colour holds the space until the file arrives; width and height prevent any shift */
+.photo-frame {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  aspect-ratio: var(--aspect);
+}
+
+/* An inline <picture> sizes to its content, so the image's 100% would resolve to its intrinsic width */
+.photo-frame picture {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.photo-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
+.gallery-item .photo-img {
+  transition: opacity 240ms var(--ease-out);
+}
+
+.gallery-item a:hover .photo-img {
+  opacity: 0.9;
+}
+
+/* One photograph, as large as the screen allows, with the caption's first line still in view.
+   The arrows sit in their own columns beside it; the image gives up their width, not its height. */
+.photo-stage {
+  --arrow: 3rem;
+  --arrow-gap: clamp(0.5rem, 1.5vw, 1.5rem);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--arrow-gap);
+  touch-action: pan-y;
+}
+
+.photo-stage .photo-frame {
+  width: min(calc(100% - 2 * (var(--arrow) + var(--arrow-gap))), calc((100svh - 9rem) * var(--aspect)));
+}
+
+/* The pixel face's arrows, the same marks as the running head's links */
+.stage-arrow {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: var(--arrow);
+  height: var(--arrow);
+  font-family: var(--font-pixel);
+  font-size: var(--text-item);
+  line-height: 1;
+  color: var(--color-ink-3);
+  text-decoration: none;
+  transition:
+    color 160ms var(--ease-out),
+    transform 160ms var(--ease-out);
+}
+
+.stage-arrow[data-empty] {
+  visibility: hidden;
+}
+
+.stage-arrow:hover {
+  color: var(--color-accent);
+}
+
+.stage-arrow[data-dir="prev"]:hover {
+  transform: translateX(-3px);
+}
+
+.stage-arrow[data-dir="next"]:hover {
+  transform: translateX(3px);
+}
+
+/* Phones: no room beside the image, so the arrows sit on its edges on a paper chip */
+@media (width < 48rem) {
+  .photo-stage .photo-frame {
+    width: min(100%, calc((100svh - 9rem) * var(--aspect)));
+  }
+
+  .stage-arrow {
+    position: absolute;
+    top: 50%;
+    z-index: 1;
+    width: 2.75rem;
+    height: 2.75rem;
+    translate: 0 -50%;
+    color: var(--color-ink);
+    background: color-mix(in srgb, var(--color-paper) 72%, transparent);
+  }
+
+  .stage-arrow[data-dir="prev"] {
+    left: calc(var(--spacing-gutter) + 0.5rem);
+  }
+
+  .stage-arrow[data-dir="next"] {
+    right: calc(var(--spacing-gutter) + 0.5rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage-arrow {
+    transition: none;
+  }
+
+  .stage-arrow:hover {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* The plate you open grows into the stage; everything else cross-fades */
+  ::view-transition-group(*) {
+    animation-duration: 460ms;
+    animation-timing-function: var(--ease-out);
+  }
+}
