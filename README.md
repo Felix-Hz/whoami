@@ -19,13 +19,13 @@ The source of [felix-hzv.dev](https://felix-hzv.dev): who I am, what I write, th
 
 ## What's here
 
-| Path | What it is |
-|---|---|
-| `src/` | the site: Preact, Vite and Tailwind, prerendered to static HTML |
-| `studio/` | the Sanity Studio for posts and photographs |
+| Path       | What it is                                                                                      |
+| ---------- | ----------------------------------------------------------------------------------------------- |
+| `src/`     | the site: Preact, Vite and Tailwind, prerendered to static HTML                                 |
+| `studio/`  | the Sanity Studio for posts and photographs                                                     |
 | `scripts/` | content fetch, prerender, feeds, social images, favicon, font subsetting and the photo pipeline |
-| `infra/` | Terraform for the bucket, CDN, DNS and the CI role |
-| `fonts/` | source fonts; the subsets the site ships are generated from these |
+| `infra/`   | Terraform for the bucket, CDN, DNS and the CI role                                              |
+| `fonts/`   | source fonts; the subsets the site ships are generated from these                               |
 
 ## Run it locally
 
@@ -53,12 +53,12 @@ Photographs are prepared locally by `scripts/photos.py`: it strips metadata, res
 
 ## Deployment
 
-| When | What happens |
-|---|---|
-| A pull request is opened or updated | lint, type-check and build, behind a single `ci-ok` check |
-| A change reaches `main` | the site is built, infrastructure applied, files synced and the CDN cache cleared |
-| A change to `studio/` reaches `main` | the studio is redeployed |
-| Content is published in Sanity | the site is rebuilt and redeployed |
+| When                                 | What happens                                                                      |
+| ------------------------------------ | --------------------------------------------------------------------------------- |
+| A pull request is opened or updated  | lint, type-check and build, behind a single `ci-ok` check                         |
+| A change reaches `main`              | the site is built, infrastructure applied, files synced and the CDN cache cleared |
+| A change to `studio/` reaches `main` | the studio is redeployed                                                          |
+| Content is published in Sanity       | the site is rebuilt and redeployed                                                |
 
 Dependency updates from Dependabot merge themselves once `ci-ok` passes.
 
