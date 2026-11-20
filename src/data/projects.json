@@ -5,5 +5,12 @@
     "repo": "https://github.com/Felix-Hz/cofr",
     "url": "https://cofr.cash/",
     "tags": ["self-host", "personal-finance", "FOSS"]
+  },
+  {
+    "name": "spanner",
+    "description": "power, fan and battery tuning with recorded monitoring for windows laptops",
+    "repo": "https://github.com/Felix-Hz/spanner",
+    "url": null,
+    "tags": ["windows", "rust", "FOSS"]
   }
 ]
