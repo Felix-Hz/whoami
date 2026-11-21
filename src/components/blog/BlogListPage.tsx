@@ -16,8 +16,8 @@ export function BlogListPage(_props: RoutableProps) {
   return (
     <section aria-labelledby="writing-title" className="page-grid pt-8 md:pt-16 pb-chapter">
       <div className="col-margin mb-4 md:mb-0 md:pt-[1.2vw]">
-        <span className="font-pixel text-accent text-small">03</span>
-        <p className="meta mt-1">
+        <span className="label text-accent">[ 03 ]</span>
+        <p className="label mt-1">
           contents · {posts.length} {posts.length === 1 ? "entry" : "entries"}
         </p>
       </div>

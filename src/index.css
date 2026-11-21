@@ -14,6 +14,7 @@
   --color-ink-3: #5f6270;
   --color-rule: #dadbe2;
   --color-accent: #1d3ea8;
+  --color-ember: #b8430f;
   --color-tint: #edf0fa;
   --color-transparent: transparent;
   --color-current: currentColor;
@@ -22,6 +23,7 @@
   --font-*: initial;
   --font-display: "newsreader-display", "newsreader-display-fallback", Georgia, serif;
   --font-body: "newsreader", "newsreader-fallback", Georgia, serif;
+  --font-sans: "instrument-sans", "instrument-sans-fallback", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "jetbrains-mono", "jetbrains-mono-fallback", ui-monospace, monospace;
   --font-pixel: "departure-mono", "departure-mono-fallback", ui-monospace, monospace;
 
@@ -46,6 +48,8 @@
   --text-small--line-height: 1.5;
   --text-code: clamp(0.8125rem, 0.75rem + 0.2vw, 0.90625rem);
   --text-code--line-height: 1.7;
+  --text-label: 0.6875rem;
+  --text-label--line-height: 1.7;
   --text-meta: 0.8125rem;
   --text-meta--line-height: 1.65;
   --text-wordmark: 1.1875rem;
@@ -79,6 +83,7 @@
   --color-ink-3: #8d93ab;
   --color-rule: #262c45;
   --color-accent: #93a9ff;
+  --color-ember: #f0743c;
   --color-tint: #161b33;
   color-scheme: dark;
 }
@@ -232,6 +237,53 @@ a {
   color: var(--color-ink-3);
 }
 
+/* Instrument labels: mono caps for structure (section numbers, field names, nav). Raw values stay in .meta */
+@utility label {
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink-3);
+}
+
+/* Spec list: label left, value right, ink rule on top and hairlines between. In the components layer, so
+   utilities can override it */
+@layer components {
+  .spec {
+    display: grid;
+    grid-template-columns: minmax(7.5rem, auto) minmax(0, 1fr);
+    border-top: 1px solid var(--color-ink);
+  }
+  .spec dt,
+  .spec dd {
+    margin: 0;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid var(--color-rule);
+  }
+  .spec dt {
+    padding-right: 1.5rem;
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    line-height: 1.25rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-ink-3);
+  }
+  .spec dd {
+    font-family: var(--font-mono);
+    font-size: var(--text-meta);
+    line-height: 1.25rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-ink-2);
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+}
+
 /* Display cuts are drawn for size 72; text cuts for running copy */
 @utility display {
   font-family: var(--font-display);
@@ -319,6 +371,24 @@ a {
   .post-body > .figure {
     grid-column: 4 / 12;
   }
+}
+
+/* Figures in a post are numbered in order: Fig 1, Fig 2 */
+.post-body {
+  counter-reset: fig;
+}
+.post-body > .figure {
+  counter-increment: fig;
+}
+.fig-caption::before {
+  content: "Fig " counter(fig);
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-accent);
 }
 
 .post-body > .code-block,

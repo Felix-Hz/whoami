@@ -58,14 +58,16 @@ export function createPortableTextComponents(body: PostBodyBlock[]): PortableTex
             decoding="async"
             className="w-full h-auto"
           />
-          {value.caption && <figcaption className="meta mt-2">{value.caption}</figcaption>}
+          {value.caption && (
+            <figcaption className="fig-caption font-sans text-[0.9375rem] text-ink-3 mt-3">{value.caption}</figcaption>
+          )}
         </figure>
       ),
       code: ({ value }) => {
         const lines = (value.code ?? "").replace(/\n+$/, "").split("\n").length;
         return (
           <figure className="code-block">
-            <figcaption className="meta flex justify-between gap-4 px-5 md:px-6 pt-3">
+            <figcaption className="label flex justify-between gap-4 px-5 md:px-6 pt-3">
               <span>{value.language || "text"}</span>
               <span>
                 {lines} {lines === 1 ? "line" : "lines"}

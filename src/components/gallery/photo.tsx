@@ -24,6 +24,9 @@ export function fallbackSrc(p: Photo): string {
 // The no-break space keeps the @ on the same line as the place
 export const place = (p: Photo) => `@\u00a0${p.location || "unknown"}`;
 
+// Plate numbers count from 01, like a printed book's
+export const plate = (n: number) => String(n + 1).padStart(2, "0");
+
 export const transitionName = (p: Photo) => `photo-${p.imageId}`;
 
 export function Picture({
