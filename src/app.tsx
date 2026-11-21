@@ -11,6 +11,7 @@ import { Layout } from "@/components/layout/Layout";
 export function App() {
   const contentRef = useRef<HTMLDivElement>(null);
   const isFirstRender = useRef(true);
+  const lastPath = useRef("");
   const [url, setUrl] = useState("");
   // Read once at hydration; the same path the prerender rendered, so the header matches
   const [path, setPath] = useState(() => (typeof location === "undefined" ? "/" : location.pathname));
@@ -19,12 +20,24 @@ export function App() {
     // Only the dev toolbar needs the url; a state update in production would re-render the hydrated page
     if (authoringSlot.Toolbar) setUrl(e.url);
     // Same value on the first event, so Preact skips the re-render
-    setPath(e.url.split(/[?#]/)[0] || "/");
+    const next = e.url.split(/[?#]/)[0] || "/";
+    setPath(next);
     if (isFirstRender.current) {
       isFirstRender.current = false;
+      lastPath.current = next;
       return;
     }
-    window.scrollTo(0, 0);
+    const changed = next !== lastPath.current;
+    lastPath.current = next;
+    // The router handles /#who itself, so the browser never jumps to the anchor; the target exists after
+    // this render, on the next frame
+    const hash = e.url.split("#")[1];
+    if (hash) {
+      requestAnimationFrame(() => document.getElementById(decodeURIComponent(hash))?.scrollIntoView());
+    } else {
+      window.scrollTo(0, 0);
+    }
+    if (!changed) return;
     const el = contentRef.current;
     if (el) {
       el.classList.remove("route-enter");
