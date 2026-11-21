@@ -2,7 +2,7 @@ import { useEffect } from "preact/hooks";
 import type { RoutableProps } from "preact-router";
 import { getAllPhotos, type Photo } from "@/data/photos";
 import { useHead } from "@/hooks/useHead";
-import { aspect, fallbackSrc, guardImages, navigate, Picture, place } from "./photo";
+import { aspect, fallbackSrc, guardImages, navigate, Picture, place, plate } from "./photo";
 
 export const RETURN_KEY = "gallery:return";
 
@@ -36,8 +36,6 @@ const SIZES: Record<Kind, string> = {
   "inset-right": "(min-width: 64rem) 64vw, 96vw",
 };
 
-const plate = (n: number) => String(n + 1).padStart(2, "0");
-
 function Item({ photo, n, sizes, eager }: { photo: Photo; n: number; sizes: string; eager: boolean }) {
   const href = `/gallery/${photo.slug}`;
   return (
@@ -52,8 +50,8 @@ function Item({ photo, n, sizes, eager }: { photo: Photo; n: number; sizes: stri
         <Picture photo={photo} sizes={sizes} eager={eager} named />
       </a>
       <figcaption className="mt-3 flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
-        <span className="font-pixel text-accent text-meta">{plate(n)}</span>
-        <span className="text-small text-ink">{photo.title}</span>
+        <span className="label text-accent">{plate(n)}</span>
+        <span className="font-sans font-medium text-small text-ink">{photo.title}</span>
         <span className="meta">{place(photo)}</span>
       </figcaption>
     </figure>
@@ -89,9 +87,9 @@ export function GalleryPage(_props: RoutableProps) {
     <>
       <section aria-labelledby="gallery-title" className="page-grid pt-8 md:pt-16">
         <div className="col-margin mb-4 md:mb-0 md:pt-[1.2vw]">
-          <span className="font-pixel text-accent text-small">04</span>
-          <p className="meta mt-1">
-            plates · {photos.length} {photos.length === 1 ? "photograph" : "photographs"}
+          <span className="label text-accent">[ 04 ]</span>
+          <p className="label mt-1">
+            {photos.length} {photos.length === 1 ? "photograph" : "photographs"}
           </p>
         </div>
         <div className="col-main">

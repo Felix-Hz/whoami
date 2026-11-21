@@ -20,7 +20,7 @@ export function BlogPostCard({ post, index, thumbs }: { post: BlogPost; index: n
         </span>
         <span className="min-w-0">
           <span className="block text-item text-ink group-hover:text-accent">{post.title}</span>
-          {post.excerpt && <span className="block text-small text-ink-2 mt-1">{post.excerpt}</span>}
+          {post.excerpt && <span className="block font-sans text-small text-ink-2 mt-1">{post.excerpt}</span>}
           {post.tags.length > 0 && (
             <span className="block meta mt-2">
               <span className="sr-only">tags: </span>
@@ -52,7 +52,7 @@ export function BlogPostCard({ post, index, thumbs }: { post: BlogPost; index: n
               />
             </span>
           )}
-          <span className="meta whitespace-nowrap">{post.readingTime} min</span>
+          <span className="label whitespace-nowrap">{post.readingTime} min</span>
         </span>
       </a>
     </li>

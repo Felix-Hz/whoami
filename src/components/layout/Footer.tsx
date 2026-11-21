@@ -8,7 +8,7 @@ export function Footer() {
       </p>
       <nav
         aria-label="Elsewhere"
-        className="col-span-full md:col-span-4 lg:col-span-6 flex gap-6 mt-3 md:mt-0 md:justify-end"
+        className="label col-span-full md:col-span-4 lg:col-span-6 flex gap-6 mt-3 md:mt-0 md:justify-end"
       >
         {OUTBOUND.map((o) => (
           <a

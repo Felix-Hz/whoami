@@ -13,7 +13,7 @@ function Chapters({ onNavigate, active }: { onNavigate?: () => void; active?: st
       aria-current={active === c.section ? "location" : undefined}
       className="text-ink-2 hover:text-accent"
     >
-      <span className="font-pixel text-accent mr-[0.4em]">{c.n}</span>
+      <span className="text-accent mr-[0.5em]">{c.n}</span>
       {c.label}
     </a>
   ));
@@ -114,7 +114,10 @@ export function Header({ home = false }: { home?: boolean }) {
           </div>
 
           {/* Desktop and tablet: chapters, then outbound links after a hairline */}
-          <nav aria-label="Main" className="hidden md:flex md:col-span-5 lg:col-span-9 justify-end items-baseline meta">
+          <nav
+            aria-label="Main"
+            className="hidden md:flex md:col-span-5 lg:col-span-9 justify-end items-baseline label"
+          >
             <div className="flex gap-7">
               <Chapters active={active} />
             </div>
@@ -132,9 +135,9 @@ export function Header({ home = false }: { home?: boolean }) {
               <Controls home={home} />
             </div>
             <details ref={menu} className="group">
-              <summary className="meta text-ink-2 list-none cursor-pointer select-none py-3 -my-3 [&::-webkit-details-marker]:hidden">
-                index <span className="font-pixel text-accent group-open:hidden">+</span>
-                <span className="font-pixel text-accent hidden group-open:inline">−</span>
+              <summary className="label text-ink-2 list-none cursor-pointer select-none py-3 -my-3 [&::-webkit-details-marker]:hidden">
+                index <span className="text-accent group-open:hidden">[+]</span>
+                <span className="text-accent hidden group-open:inline">[−]</span>
               </summary>
               <nav
                 aria-label="Main"

@@ -5,7 +5,7 @@ export function GetInTouch() {
   return (
     <section aria-label="get in touch" className="page-grid chapter-rule pt-chapter pb-12 md:pb-16">
       <p className="col-main display text-section">
-        if any of this was useful, or wrong, write to{" "}
+        if any of this was useful, or wrong, or nice, or something, just write to{" "}
         <a
           href={`mailto:${EMAIL}`}
           data-event="contact:email"

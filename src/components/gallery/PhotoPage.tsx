@@ -3,7 +3,7 @@ import type { RoutableProps } from "preact-router";
 import { getAllPhotos, getPhotoIndex, type Photo } from "@/data/photos";
 import { useHead } from "@/hooks/useHead";
 import { RETURN_KEY } from "./GalleryPage";
-import { aspect, fallbackSrc, guardImages, navigate, Picture, place, preload } from "./photo";
+import { aspect, fallbackSrc, guardImages, navigate, Picture, place, plate, preload } from "./photo";
 
 interface PhotoPageProps extends RoutableProps {
   slug?: string;
@@ -12,8 +12,6 @@ interface PhotoPageProps extends RoutableProps {
 // The stage is bounded by the viewport height as well as its width (see .photo-stage)
 const STAGE_SIZES = "(min-width: 64rem) 88vw, 100vw";
 const SWIPE_PX = 50;
-
-const plate = (n: number) => String(n + 1).padStart(2, "0");
 
 function keyHandler(onPrev: () => void, onNext: () => void) {
   return (e: KeyboardEvent) => {
@@ -54,8 +52,8 @@ function Detail({ label, value }: { label: string; value?: string | null }) {
   if (!value) return null;
   return (
     <div className="contents">
-      <dt className="text-ink-3">{label}</dt>
-      <dd className="text-ink-2">{value}</dd>
+      <dt>{label}</dt>
+      <dd>{value}</dd>
     </div>
   );
 }
@@ -180,7 +178,7 @@ export function PhotoPage({ slug }: PhotoPageProps) {
           className="col-margin meta order-2 md:order-none mt-8 md:mt-0 flex flex-col gap-3 md:pt-[0.6vw]"
         >
           <p>
-            <span className="font-pixel text-accent">{plate(index)}</span>
+            <span className="text-accent">{plate(index)}</span>
             <span className="text-ink-3"> / {plate(photos.length - 1)}</span>
           </p>
           <p>
@@ -192,7 +190,7 @@ export function PhotoPage({ slug }: PhotoPageProps) {
         <div className="col-main">
           <h1 className="display text-section">{photo.title}</h1>
           <p className="text-lead text-ink-2 mt-3">{place(photo)}</p>
-          <dl className="meta mt-6 grid grid-cols-[auto_minmax(0,1fr)] gap-x-6 gap-y-1">
+          <dl className="spec mt-6">
             <Detail label="author" value={photo.author} />
             <Detail label="camera" value={photo.camera} />
             <Detail label="lens" value={photo.lens} />

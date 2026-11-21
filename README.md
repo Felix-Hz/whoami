@@ -68,4 +68,4 @@ The site is served from S3 through CloudFront, with DNS on Cloudflare. Everythin
 
 ## Design
 
-The site sets the design system I use across my projects: one cobalt ink on paper, Newsreader for reading, JetBrains Mono for the margins and Departure Mono for the wordmark. Its tokens live at the top of `src/index.css`. The favicon is the wordmark's `$` and cursor drawn on a 16-pixel grid; `pnpm exec tsx scripts/favicon.ts` regenerates it.
+The site sets Seamount, the design system I use across my projects: one cobalt ink on paper, Newsreader for reading, Instrument Sans for captions and descriptions, JetBrains Mono for labels and figures, and Departure Mono for the wordmark. Its tokens live at the top of `src/index.css`. The favicon is the wordmark's `$` and cursor drawn on a 16-pixel grid; `pnpm exec tsx scripts/favicon.ts` regenerates it.

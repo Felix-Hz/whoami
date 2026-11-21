@@ -8,6 +8,7 @@ import { ditherLevel, ditherParams, onDitherLevel } from "@/motion/ditherLevel";
 import { heroProgress, unwatchHero, watchHero } from "@/motion/heroProgress";
 import { AsciiPortrait } from "./AsciiPortrait";
 import { Chapter } from "./Chapter";
+import { Gallery } from "./Gallery";
 import { GetInTouch } from "./GetInTouch";
 import { Projects } from "./Projects";
 
@@ -21,7 +22,7 @@ interface NetworkInformation {
 // Every piece of type outside the hero that the faint field must stay clear of. Outermost matches only,
 // so a list row counts once rather than once per span inside it.
 const PAGE_TYPE =
-  "header :is(a, summary, button, [role=slider]), main section:not([data-hero]) :is(h2, p, li, article, .font-pixel, a), footer :is(p, a)";
+  "header :is(a, summary, button, [role=slider]), main section:not([data-hero]) :is(h2, p, li, article, .label, a), footer :is(p, a)";
 
 function pageType(): HTMLElement[] {
   const found = [...document.querySelectorAll<HTMLElement>(PAGE_TYPE)];
@@ -114,7 +115,7 @@ export function HeroSection(_props: RoutableProps) {
           className="fixed left-0 top-0 w-full h-[calc(100lvh+3px)] -z-10 pointer-events-none"
         />
         <div className="page-grid relative z-10">
-          <div data-margin className="col-margin meta order-3 md:order-none mt-8 md:mt-0 md:pt-[1.6vw]">
+          <div data-margin className="col-margin label order-3 md:order-none mt-8 md:mt-0 md:pt-[1.6vw]">
             <p className="text-accent">software engineer</p>
             {latest && (
               <p className="mt-4">
@@ -178,12 +179,14 @@ export function HeroSection(_props: RoutableProps) {
           <PostIndex posts={posts.slice(0, HOME_POSTS)} thumbs={false} />
           <a
             href="/blog"
-            className="inline-block mt-6 font-mono text-meta text-ink underline decoration-accent hover:text-accent"
+            className="inline-block mt-6 font-mono text-label font-medium uppercase tracking-[0.04em] text-ink underline decoration-accent hover:text-accent"
           >
             all writing →
           </a>
         </Chapter>
       )}
+
+      <Gallery />
 
       <GetInTouch />
     </>
