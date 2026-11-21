@@ -19,10 +19,9 @@ interface NetworkInformation {
   saveData?: boolean;
 }
 
-// Every piece of type outside the hero that the faint field must stay clear of. Outermost matches only,
-// so a list row counts once rather than once per span inside it.
-const PAGE_TYPE =
-  "header :is(a, summary, button, [role=slider]), main section:not([data-hero]) :is(h2, p, li, article, .label, a), footer :is(p, a)";
+// Whole columns outside the hero that the field must stay clear of. The shader has a fixed number of boxes,
+// so clearing a column keeps every line of type protected however busy the screen is.
+const PAGE_TYPE = "header, main section:not([data-hero]) :is(.col-main, .col-margin > *), footer";
 
 function pageType(): HTMLElement[] {
   const found = [...document.querySelectorAll<HTMLElement>(PAGE_TYPE)];
@@ -30,7 +29,7 @@ function pageType(): HTMLElement[] {
 }
 
 // The shader is code-split and only fetched once the page is idle, after first paint. Reduced motion,
-// Save-Data and no WebGL all keep the static dotted poster instead.
+// Save-Data and no WebGL all keep plain paper instead.
 function useDither(hero: { current: HTMLElement | null }, canvas: { current: HTMLCanvasElement | null }) {
   useEffect(() => {
     const el = hero.current;
@@ -69,7 +68,7 @@ function useDither(hero: { current: HTMLElement | null }, canvas: { current: HTM
       apply(ditherLevel());
     };
 
-    // The knob: 0 stops the shader and the static grid shows; anything else boots it or retunes it live
+    // The knob: 0 stops the shader and hides the field; anything else boots it or retunes it live
     function apply(level: number) {
       if (!handle) {
         if (level > 0) void boot();
@@ -104,7 +103,7 @@ export function HeroSection(_props: RoutableProps) {
       <section
         ref={hero}
         aria-labelledby="name"
-        className="hero-poster relative pt-6 pb-14 md:pt-16 md:pb-24 lg:pt-20 lg:pb-28"
+        className="relative pt-6 pb-14 md:pt-16 md:pb-24 lg:pt-20 lg:pb-28"
         data-hero
       >
         {/* One field behind the whole page; 3px taller than the viewport so it can step with the scroll */}
@@ -161,7 +160,7 @@ export function HeroSection(_props: RoutableProps) {
 
           {/* Phones and tablets: above the name. Desktop: bottom-aligned with the thesis against the right
               gutter, rising beside the name's last line. Sized in vw so it scales with the grid. */}
-          <AsciiPortrait className="order-first col-span-full mb-8 text-[1.6vw] md:col-start-3 md:col-span-6 md:text-[1.1vw] lg:order-none lg:col-auto lg:mb-0 lg:absolute lg:right-gutter lg:bottom-0 lg:text-[min(0.6vw,9px)]" />
+          <AsciiPortrait className="order-first col-span-full mb-8 text-[1.15vw] md:col-start-3 md:col-span-6 md:text-[0.616vw] lg:order-none lg:col-auto lg:mb-0 lg:absolute lg:right-gutter lg:bottom-0 lg:text-[min(0.4vw,6px)]" />
         </div>
       </section>
 

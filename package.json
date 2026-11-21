@@ -19,6 +19,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@felix-hz/seamount": "0.2.0",
     "@portabletext/react": "^6.2.0",
     "@sanity/client": "^8.16.0",
     "@tailwindcss/vite": "^4.3.5",

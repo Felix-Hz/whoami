@@ -102,7 +102,7 @@ export function GalleryPage(_props: RoutableProps) {
 
       {photos.length === 0 ? (
         <div className="page-grid pt-10 pb-chapter">
-          <p className="col-main meta border-t border-ink pt-5">
+          <p className="col-main meta border-t border-rule pt-5">
             <span className="text-accent">$</span> ls ./gallery
             <br />
             (empty)

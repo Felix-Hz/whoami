@@ -2,8 +2,9 @@ import { ditherParams, type KnobParams, LEVEL_DEFAULT } from "./ditherLevel";
 import { frameClock, type Spring, spring, spring0 } from "./spring";
 
 /**
- * The home page's one background: a 1-bit ordered dither of slow noise, printed in the accent ink at a
- * third of the CSS resolution and scaled up pixelated, like a risograph. One fixed canvas behind the
+ * The home page's one background: a 1-bit stipple of slow warped noise, printed in the accent ink at
+ * half the CSS resolution and scaled up pixelated, like a risograph. Its threshold is irregular because an ordered
+ * matrix at this density prints a visible lattice. One fixed canvas behind the
  * whole page; the pattern is anchored to the page, so it scrolls with the content. Its jobs:
  *  - give the page a faint printed texture along its left margin;
  *  - get out of the way of type: small type always keeps a soft clearing, and pointing at the hero's
@@ -15,13 +16,13 @@ import { frameClock, type Spring, spring, spring0 } from "./spring";
 
 // Boxes uploaded per frame: only those on screen. 48 uniform vectors plus a handful fits mobile GPUs (64)
 const MAX_BOXES = 24;
-const SCALE = 1 / 3; // canvas pixels per CSS pixel
+const SCALE = 1 / 2; // canvas pixels per CSS pixel
 const STEP = 1 / SCALE; // CSS px per canvas pixel: the canvas moves in whole steps of this, so dots never shimmer
 const PAD = 12; // CSS px of air around a line of type; the feather adds five times this
 // How much of the field each kind of block clears at rest, 0..1. The portrait keeps a fifth of the dither;
-// type keeps 15% fewer dots than the portrait does
+// type stays fully clear at every knob level
 const PORTRAIT_CLEAR = 0.8;
-const TEXT_CLEAR = 1 - (1 - PORTRAIT_CLEAR) * 0.85;
+const TEXT_CLEAR = 1;
 
 const VERT = "attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}";
 const FRAG = `precision highp float;
@@ -30,16 +31,15 @@ uniform float scroll;uniform vec4 H;uniform vec3 K;uniform float band;
 uniform vec4 L[${MAX_BOXES}];uniform vec4 P[${MAX_BOXES}];uniform float pad;
 float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1.,0.)),f.x),mix(h(i+vec2(0.,1.)),h(i+vec2(1.,1.)),f.x),f.y);}
-float b2(vec2 a){a=floor(a);return fract(a.x*.5+a.y*a.y*.75);}
-float b4(vec2 a){return b2(.5*a)*.25+b2(a);}
-float b8(vec2 a){return b4(.5*a)*.25+b2(a);}
+float ign(vec2 p){p=floor(p);return fract(52.9829189*fract(dot(p,vec2(.06711056,.00583715))));}
+float fbm(vec2 p){return .58*n(p)+.29*n(p*2.03+7.1)+.13*n(p*4.01+13.7);}
 float sdBox(vec2 p,vec2 c,vec2 b,float k){vec2 q=abs(p-c)-b+k;return length(max(q,0.))+min(max(q.x,q.y),0.)-k;}
 void main(){
   vec2 px=gl_FragCoord.xy;
   // Page space: y grows downward from the top of the document, so noise and dots travel with the content
   vec2 pg=vec2(px.x,r.y-px.y+scroll);
   vec2 uv=pg/r.x*1.6;
-  float n0=.6*n(uv*2.6+vec2(0.,t*.035))+.4*n(uv*6.-vec2(t*.03,0.));
+  vec2 warp=vec2(fbm(uv*1.15+vec2(t*.012,2.3)),fbm(uv*1.15+vec2(5.2,-t*.01)));float n0=fbm(uv*1.9+warp*1.15+vec2(0.,t*.016));
   float x=px.x/r.x;
   // One quiet field across the whole page: sparse, kept to the left margin. inHero only tunes the lens below.
   float hy=(px.y-H.y)/max(1.,H.w-H.y);
@@ -47,13 +47,13 @@ void main(){
   // Above the default the field also spreads: from the left margin at 1 to the whole width at the top
   // K is the knob in the header: x is how high the noise must rise before it prints (so the knob
   // changes how much of the page carries dots), y the density where it does, z how far right it spreads
-  float v=K.y*smoothstep(K.x,1.,n0)*(1.-smoothstep(.02,mix(.32,1.25,K.z),x));
+  float v=.62*K.y*smoothstep(K.x+.05,.86,n0)*(1.-smoothstep(.015,mix(.27,1.25,K.z),x));
   float k=0.;
   for(int i=0;i<${MAX_BOXES};i++){
     vec4 q=L[i];if(q.z<=q.x)continue;vec4 s=P[i];
     vec2 c=(q.xy+q.zw)*.5;vec2 b=(q.zw-q.xy)*.5;
     // A wide feather, so the field thins gradually toward type instead of stopping at an edge
-    float box=1.-smoothstep(-pad*.5,pad*5.,sdBox(px,c,b,pad));
+    float box=1.-smoothstep(0.,pad*5.,sdBox(px,c,b,pad));
     float reveal=1.-smoothstep(s.z-pad*6.,s.z,length(px-s.xy));
     k=max(k,box*max(reveal,s.w));
   }
@@ -62,14 +62,14 @@ void main(){
   float hb=smoothstep(r.y-band-pad*4.,r.y-band,px.y)*smoothstep(0.,pad,band);
   v*=1.-hb;
   // A hair of bias keeps empty paper clean without swallowing the faint end of the knob
-  float field=step(b8(pg)+.004,v*.85);
+  float grain=fract(ign(pg)+.42*h(floor(pg*.5)));float field=step(grain+.004,min(v*.85,mix(.15,.38,K.z)));
   // The pointer lens is its own dithered bitmap, XOR'd with the field: where it meets the field it prints
   // the negative (dots become gaps, gaps become dots); over empty paper it's a light lens of its own.
   // It steps aside wherever type is clear.
   float d=length(px-m)/r.x*1.6;
   float l=mi*exp(-d*d*64.)*(1.-k)*(1.-hb)*(.38+.62*smoothstep(.02,.2,v))*mix(.6,1.,inHero);
-  float lens=step(b8(pg+vec2(3.,5.))+.02,l*.95);
-  gl_FragColor=vec4(mix(paper,ink,abs(field-lens)),1.);
+  float lens=step(ign(pg+vec2(3.,5.))+.02,l*.62);
+  gl_FragColor=vec4(mix(paper,ink,abs(field-lens)*.52),1.);
 }`;
 
 interface Box {
@@ -101,7 +101,7 @@ export interface DitherHandle {
   stop: () => void;
   // Live settings from the knob, see ditherParams
   setKnob: (params: KnobParams) => void;
-  // The knob's on/off: pauses rendering and shows the static grid, keeping the GL context alive,
+  // The knob's on/off: pauses rendering and hides the field, keeping the GL context alive,
   // because a canvas can't get a fresh context once its old one has been released
   setEnabled: (on: boolean) => void;
 }
@@ -456,7 +456,6 @@ export async function startDither({
     e.preventDefault();
     cancelAnimationFrame(raf);
     raf = 0;
-    hero.dataset.dither = "lost";
   };
 
   const resizer = new ResizeObserver(() => {
@@ -482,10 +481,9 @@ export async function startDither({
 
   readColors();
   measure();
-  // First frame on the next animation frame, then the poster steps aside
+  // First frame on the next animation frame
   requestAnimationFrame((now) => {
     draw(now);
-    hero.dataset.dither = "on";
     resume();
   });
 
@@ -502,7 +500,6 @@ export async function startDither({
     gl.getExtension("WEBGL_lose_context")?.loseContext();
     canvas.style.transform = "";
     canvas.style.visibility = "";
-    delete hero.dataset.dither;
   };
 
   const setKnob = (next: KnobParams) => {
@@ -518,13 +515,10 @@ export async function startDither({
     if (on) {
       measure();
       draw(performance.now());
-      hero.dataset.dither = "on";
       resume();
     } else {
       cancelAnimationFrame(raf);
       raf = 0;
-      // Anything but "on" brings the static grid back (see .hero-poster in index.css)
-      hero.dataset.dither = "off";
     }
   };
 

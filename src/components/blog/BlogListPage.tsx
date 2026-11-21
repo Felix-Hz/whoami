@@ -30,7 +30,7 @@ export function BlogListPage(_props: RoutableProps) {
         </p>
         <div className="mt-10 md:mt-14">
           {posts.length === 0 ? (
-            <p className="meta border-t border-ink pt-5">
+            <p className="meta border-t border-rule pt-5">
               <span className="text-accent">$</span> ls ./posts
               <br />
               (empty)

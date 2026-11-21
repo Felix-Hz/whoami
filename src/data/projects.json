@@ -1,5 +1,12 @@
 [
   {
+    "name": "beacon",
+    "description": "cookieless page analytics on a cloudflare worker",
+    "repo": "https://github.com/Felix-Hz/beacon",
+    "url": null,
+    "tags": ["analytics", "privacy", "cookieless"]
+  },
+  {
     "name": "cofr",
     "description": "privacy-first expense tracking webapp",
     "repo": "https://github.com/Felix-Hz/cofr",
@@ -7,8 +14,15 @@
     "tags": ["self-host", "personal-finance"]
   },
   {
+    "name": "seamount",
+    "description": "a fully-fledged design system in css and react",
+    "repo": "https://github.com/Felix-Hz/seamount",
+    "url": "https://www.npmjs.com/package/@felix-hz/seamount",
+    "tags": ["design-system", "ui-library", "editorial"]
+  },
+  {
     "name": "spanner",
-    "description": "power, fan and battery tuning with recorded monitoring for windows laptops",
+    "description": "computer hardware monitoring and tuning",
     "repo": "https://github.com/Felix-Hz/spanner",
     "url": null,
     "tags": ["configuration-management", "monitoring"]

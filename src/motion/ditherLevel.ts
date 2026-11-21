@@ -1,6 +1,6 @@
 import { prefersReducedMotion } from "./spring";
 
-// The dither knob's state, 0..10. 0 is off (the static dot grid), 1 is the designed field (the default),
+// The dither knob's state, 0..10. 0 is off (plain paper), 1 is the designed field (the default),
 // and every step up adds a visible amount of ink, to most of the page at 10. Remembered per browser; phones and reduced motion start off unless the reader turned it on.
 
 export const LEVEL_MIN = 0;
@@ -65,11 +65,11 @@ export function onDitherLevel(fn: (level: number) => void) {
 // What each knob level means to the shader: [noise threshold, density, spread].
 // One curve from the designed field (level 1) to the top (level 10): the threshold falls so dots cover
 // more of the page, the density rises, and the field spreads right. Steps are placed along it so each
-// one roughly multiplies the inked area (measured: about 0.05% of the screen at 2 up to 4.7% at 10),
+// one multiplies the inked area by about 1.5 (measured: 0.37% of the screen at 1 up to 14.7% at 10),
 // so no step is dead.
 export type KnobParams = [threshold: number, density: number, spread: number];
 
-const STEPS = [0, 0, 0.455, 0.53, 0.605, 0.66, 0.716, 0.77, 0.84, 0.92, 1];
+const STEPS = [0, 0, 0.05, 0.125, 0.2, 0.29, 0.39, 0.515, 0.655, 0.82, 1];
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
 export function ditherParams(l: number): KnobParams {
