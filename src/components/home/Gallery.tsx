@@ -16,7 +16,7 @@ export function Gallery() {
   return (
     <Chapter id="gallery" n="04" title="gallery" note={`${photos.length} photographs`}>
       {/* biome-ignore lint/a11y/noStaticElementInteractions: blocks the image context menu only; no action of its own */}
-      <div className="border-t border-ink pt-5 md:pt-6" onContextMenu={guardImages}>
+      <div className="border-t border-rule pt-5 md:pt-6" onContextMenu={guardImages}>
         <figure className="gallery-item" style={{ "--aspect": aspect(lead) }}>
           <a
             href={href}

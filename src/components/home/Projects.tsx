@@ -20,9 +20,9 @@ function Link({ href }: { href: string }) {
 
 function Entry({ project, n, of }: { project: Project; n: number; of: number }) {
   return (
-    <article className="border-t border-ink pt-5 md:pt-6">
+    <article className="border-t border-rule pt-5 md:pt-6">
       <div className="flex items-baseline justify-between gap-6">
-        <h3 className="display text-section leading-none">{project.name}</h3>
+        <h3 className="display text-item leading-none">{project.name}</h3>
         <span className="label whitespace-nowrap">
           {n} of {of}
         </span>

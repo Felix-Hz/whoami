@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "@felix-hz/seamount/tokens.css";
 
 /* ------------------------------------------------------------------ */
 /* Design tokens: Kobolt. One cobalt ink on paper, a roman serif for  */
@@ -8,14 +9,14 @@
 @theme {
   /* Tailwind's palette is off: every colour on the site comes from these tokens */
   --color-*: initial;
-  --color-paper: #fafaf8;
-  --color-ink: #15161b;
-  --color-ink-2: #3f414b;
-  --color-ink-3: #5f6270;
-  --color-rule: #dadbe2;
-  --color-accent: #1d3ea8;
-  --color-ember: #b8430f;
-  --color-tint: #edf0fa;
+  --color-paper: var(--sm-paper);
+  --color-ink: var(--sm-ink);
+  --color-ink-2: var(--sm-ink-2);
+  --color-ink-3: var(--sm-ink-3);
+  --color-rule: var(--sm-rule);
+  --color-accent: var(--sm-accent);
+  --color-ember: var(--sm-ember);
+  --color-tint: var(--sm-tint);
   --color-transparent: transparent;
   --color-current: currentColor;
 
@@ -29,34 +30,34 @@
 
   /* Type scale: fluid between 375px and 1440px, nothing in between these steps */
   --text-*: initial;
-  --text-display: clamp(3.75rem, 2rem + 9vw, 9.375rem);
-  --text-display--line-height: 0.98;
-  --text-display--letter-spacing: -0.035em;
-  --text-title: clamp(2.625rem, 1.25rem + 5.2vw, 5.25rem);
+  --text-display: clamp(2.5rem, 2.05rem + 1.9vw, 3.75rem);
+  --text-display--line-height: 1.04;
+  --text-display--letter-spacing: -0.028em;
+  --text-title: clamp(2rem, 1.75rem + 1.05vw, 2.75rem);
   --text-title--line-height: 1.02;
   --text-title--letter-spacing: -0.03em;
-  --text-section: clamp(2.375rem, 1.5rem + 3vw, 3.75rem);
-  --text-section--line-height: 1.05;
-  --text-section--letter-spacing: -0.025em;
-  --text-lead: clamp(1.3125rem, 1rem + 1.1vw, 1.875rem);
-  --text-lead--line-height: 1.35;
-  --text-item: clamp(1.375rem, 1.1rem + 0.6vw, 1.75rem);
+  --text-section: clamp(1.625rem, 1.5rem + 0.5vw, 2rem);
+  --text-section--line-height: 1.12;
+  --text-section--letter-spacing: -0.018em;
+  --text-lead: clamp(1.125rem, 1.06rem + 0.28vw, 1.3125rem);
+  --text-lead--line-height: 1.5;
+  --text-item: clamp(1.1875rem, 1.13rem + 0.24vw, 1.375rem);
   --text-item--line-height: 1.2;
-  --text-body: clamp(1.15625rem, 1rem + 0.45vw, 1.3125rem);
+  --text-body: clamp(1.0625rem, 1.03rem + 0.14vw, 1.125rem);
   --text-body--line-height: 1.62;
-  --text-small: clamp(1rem, 0.9rem + 0.3vw, 1.125rem);
+  --text-small: clamp(0.9375rem, 0.92rem + 0.08vw, 1rem);
   --text-small--line-height: 1.5;
   --text-code: clamp(0.8125rem, 0.75rem + 0.2vw, 0.90625rem);
   --text-code--line-height: 1.7;
-  --text-label: 0.6875rem;
+  --text-label: 0.65625rem;
   --text-label--line-height: 1.7;
-  --text-meta: 0.8125rem;
+  --text-meta: 0.75rem;
   --text-meta--line-height: 1.65;
-  --text-wordmark: 1.1875rem;
+  --text-wordmark: 1rem;
   --text-wordmark--line-height: 1;
 
   /* Vertical rhythm between chapters, and the page gutter */
-  --spacing-chapter: clamp(3.25rem, 2rem + 4vw, 6rem);
+  --spacing-chapter: clamp(3rem, 2.4rem + 2.4vw, 4.5rem);
   --spacing-gutter: clamp(1.375rem, 0.4rem + 4.2vw, 4.5rem);
 
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
@@ -65,26 +66,11 @@
 /* Night print: deep ink-blue ground with a lifted cobalt. Follows the OS unless data-theme says otherwise. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --color-paper: #0e1120;
-    --color-ink: #e9ebf3;
-    --color-ink-2: #b6bbcf;
-    --color-ink-3: #8d93ab;
-    --color-rule: #262c45;
-    --color-accent: #93a9ff;
-    --color-tint: #161b33;
     color-scheme: dark;
   }
 }
 
 :root[data-theme="dark"] {
-  --color-paper: #0e1120;
-  --color-ink: #e9ebf3;
-  --color-ink-2: #b6bbcf;
-  --color-ink-3: #8d93ab;
-  --color-rule: #262c45;
-  --color-accent: #93a9ff;
-  --color-ember: #f0743c;
-  --color-tint: #161b33;
   color-scheme: dark;
 }
 
@@ -255,7 +241,7 @@ a {
   .spec {
     display: grid;
     grid-template-columns: minmax(7.5rem, auto) minmax(0, 1fr);
-    border-top: 1px solid var(--color-ink);
+    border-top: 1px solid var(--color-rule);
   }
   .spec dt,
   .spec dd {
@@ -625,20 +611,6 @@ a {
 }
 
 /* The shader's stand-in for reduced motion, Save-Data and no WebGL: a static dot screen, densest on the left */
-.hero-poster::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-image: radial-gradient(circle, var(--color-accent) 0.9px, transparent 1.15px);
-  background-size: 6px 6px;
-  mask-image: linear-gradient(to left, transparent 70%, rgb(0 0 0 / 0.12) 88%, rgb(0 0 0 / 0.22));
-}
-
-.hero-poster[data-dither="on"]::before {
-  display: none;
-}
-
 /* Theme button: the moon in light (switch to dark), the sun in dark (switch to light) */
 .theme-toggle .theme-sun {
   display: none;

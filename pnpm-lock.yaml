@@ -166,6 +166,9 @@ importers:
 
   .:
     dependencies:
+      '@felix-hz/seamount':
+        specifier: 0.2.0
+        version: 0.2.0
       '@portabletext/react':
         specifier: ^6.2.0
         version: 6.2.0(react@19.3.1)
@@ -1345,6 +1348,10 @@ packages:
     peerDependenciesMeta:
       '@noble/hashes':
         optional: true
+
+  '@felix-hz/seamount@0.2.0':
+    resolution: {integrity: sha512-USjpXqxHZhGiSIAPNad9n9ABcwNQeJUITdvCrF0/05DGnk+5xLrBPcFD9DDMRGAgLINd3cRHzVFe5ghqb8fC6w==}
+    engines: {node: '>=20.19'}
 
   '@floating-ui/core@1.8.0':
     resolution: {integrity: sha512-0CIZ5itps/8x7BG8dEIhs53BvCUH2PCoogtakwRTut+Arm58sJooJ0AuZhLw2HJYIR5cMLNPBSS728sPho2khQ==}
@@ -7065,6 +7072,8 @@ snapshots:
   '@exodus/bytes@1.16.0(@noble/hashes@2.4.0)':
     optionalDependencies:
       '@noble/hashes': 2.4.0
+
+  '@felix-hz/seamount@0.2.0': {}
 
   '@floating-ui/core@1.8.0':
     dependencies:
