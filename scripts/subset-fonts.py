@@ -26,6 +26,7 @@ FALLBACKS = {
     "serif-bold": ("Georgia Bold.ttf", ['local("Georgia Bold")', 'local("Georgia-Bold")', 'local("Times New Roman Bold")']),
     "serif-italic": ("Georgia Italic.ttf", ['local("Georgia Italic")', 'local("Georgia-Italic")', 'local("Times New Roman Italic")']),
     "mono": ("Courier New.ttf", ['local("Courier New")', 'local("Courier")']),
+    "sans": ("Arial.ttf", ['local("Arial")', 'local("Helvetica Neue")', 'local("Helvetica")']),
 }
 
 # Basic Latin + Latin-1 (covers Spanish and most Western European accents), punctuation,
@@ -57,6 +58,9 @@ FONTS = [
     # Metadata and code: swaps in behind its metric-matched fallback, so it isn't worth a preload slot
     ("jetbrains-mono", "JetBrainsMono[wght].ttf", "jetbrains-mono.woff2", {"wght": (400, 500)}, "normal", "400 500", "swap", "mono", False),
     ("departure-mono", "DepartureMono-Regular.otf", "departure-mono.woff2", None, "normal", "400", "swap", "mono", True),
+    # Interface text (descriptions, excerpts, captions), all below the fold: swaps in behind its
+    # metric-matched fallback rather than taking a preload slot. Width pinned to normal; weight variable.
+    ("instrument-sans", "InstrumentSans[wdth,wght].ttf", "instrument-sans.woff2", {"wdth": 100, "wght": (400, 600)}, "normal", "400 600", "swap", "sans", False),
 ]
 
 # Rough English letter frequencies (space included) for the average-width estimate
